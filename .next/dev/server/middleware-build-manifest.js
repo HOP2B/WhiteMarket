@@ -7,13 +7,13 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/node_modules_next_dist_75b597d7._.js",
       "static/chunks/node_modules_next_link_207af988.js",
       "static/chunks/node_modules_react-dom_4411d9bd._.js",
-      "static/chunks/node_modules_@clerk_shared_dist_runtime_1330ce15._.js",
+      "static/chunks/node_modules_@clerk_shared_dist_runtime_6ccd8472._.js",
       "static/chunks/node_modules_swr_dist_85285875._.js",
       "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
-      "static/chunks/node_modules_22cefd8b._.js",
-      "static/chunks/[root-of-the-server]__88b95cb6._.js",
+      "static/chunks/node_modules_6ee9748a._.js",
+      "static/chunks/[root-of-the-server]__27d59cab._.js",
       "static/chunks/pages_index_2da965e7._.js",
-      "static/chunks/turbopack-pages_index_891cbb13._.js"
+      "static/chunks/turbopack-pages_index_2dc12619._.js"
     ],
     "/_app": [
       "static/chunks/node_modules_@clerk_nextjs_dist_esm_a8aed3d1._.js",
@@ -46,36 +46,6 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/[root-of-the-server]__092393de._.js",
       "static/chunks/pages__error_2da965e7._.js",
       "static/chunks/turbopack-pages__error_af01c4e3._.js"
-    ],
-    "/login": [
-      "static/chunks/node_modules_next_dist_compiled_8ca6b690._.js",
-      "static/chunks/node_modules_next_dist_shared_lib_d629143d._.js",
-      "static/chunks/node_modules_next_dist_client_099c73fe._.js",
-      "static/chunks/node_modules_next_dist_d989ed6c._.js",
-      "static/chunks/node_modules_next_98997c4b._.js",
-      "static/chunks/node_modules_react-dom_4411d9bd._.js",
-      "static/chunks/node_modules_@clerk_shared_dist_runtime_7a1eda53._.js",
-      "static/chunks/node_modules_swr_dist_85285875._.js",
-      "static/chunks/node_modules_@clerk_clerk-react_dist_66c13766._.js",
-      "static/chunks/node_modules_15e0c9d1._.js",
-      "static/chunks/[root-of-the-server]__2572414f._.js",
-      "static/chunks/pages_login_2da965e7._.js",
-      "static/chunks/turbopack-pages_login_1a3cc31c._.js"
-    ],
-    "/login/[[...index]]": [
-      "static/chunks/node_modules_next_dist_compiled_8ca6b690._.js",
-      "static/chunks/node_modules_next_dist_shared_lib_d629143d._.js",
-      "static/chunks/node_modules_next_dist_client_099c73fe._.js",
-      "static/chunks/node_modules_next_dist_d989ed6c._.js",
-      "static/chunks/node_modules_next_98997c4b._.js",
-      "static/chunks/node_modules_react-dom_4411d9bd._.js",
-      "static/chunks/node_modules_@clerk_shared_dist_runtime_7a1eda53._.js",
-      "static/chunks/node_modules_swr_dist_85285875._.js",
-      "static/chunks/node_modules_@clerk_clerk-react_dist_66c13766._.js",
-      "static/chunks/node_modules_15e0c9d1._.js",
-      "static/chunks/[root-of-the-server]__d8a0043b._.js",
-      "static/chunks/pages_login_[[___index]]_tsx_2da965e7._.js",
-      "static/chunks/turbopack-pages_login_[[___index]]_tsx_deb7e162._.js"
     ]
   },
   "devFiles": [],

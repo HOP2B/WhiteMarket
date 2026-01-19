@@ -5,12 +5,6 @@ self.__BUILD_MANIFEST = {
   "/_error": [
     "static/chunks/pages/_error.js"
   ],
-  "/login": [
-    "static/chunks/pages/login.js"
-  ],
-  "/login/[[...index]]": [
-    "static/chunks/pages/login/[[...index]].js"
-  ],
   "__rewrites": {
     "afterFiles": [],
     "beforeFiles": [],
@@ -23,8 +17,11 @@ self.__BUILD_MANIFEST = {
     "/dashboard",
     "/gigs/[id]",
     "/jobs",
+    "/login/employer/[[...index]]",
+    "/login/worker/[[...index]]",
     "/login/[[...index]]",
     "/messages",
+    "/offer-service",
     "/profile/[id]",
     "/register/[[...index]]"
   ]

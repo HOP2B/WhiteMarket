@@ -2,13 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../components/Navbar";
 import { getGigById, getUserById } from "../../api/mockApi";
+import { useAuth } from "../../context/AuthContext";
 
 const GigDetail: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
+  const { user } = useAuth();
   const [gig, setGig] = useState<any>(null);
   const [seller, setSeller] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleContactSeller = () => {
+    if (user && gig) {
+      router.push(`/messages?contact=${gig.userId}`);
+    } else {
+      router.push("/login");
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -131,10 +141,13 @@ const GigDetail: React.FC = () => {
                   </button>
 
                   <div className="space-y-3">
-                    <button className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50">
+                    <button
+                      onClick={handleContactSeller}
+                      className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200"
+                    >
                       Contact Seller
                     </button>
-                    <button className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50">
+                    <button className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200">
                       Add to Favorites
                     </button>
                   </div>

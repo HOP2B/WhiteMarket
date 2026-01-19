@@ -49,7 +49,18 @@ export const getUserById = async (id: string) => {
     .eq("id", id)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // If user not found in database, return a default user
+    // This handles cases where user signed up but no record in users table
+    return {
+      id,
+      name: "Unknown User",
+      email: "unknown@example.com",
+      avatar: "/default-avatar.jpg",
+      bio: "User profile not available",
+      skills: [],
+    };
+  }
   return data;
 };
 

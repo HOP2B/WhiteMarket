@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getMessages, sendMessage } from "../api/mockApi";
+import { getMessages, sendMessage, getUserById } from "../api/mockApi";
+import { supabase } from "../lib/supabase";
 
 const Messages: React.FC = () => {
   const { user } = useAuth();
+  const router = useRouter();
+  const { contact } = router.query;
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null);
+  const [conversationUsers, setConversationUsers] = useState<any>({});
 
   useEffect(() => {
     if (user) {
@@ -18,6 +23,24 @@ const Messages: React.FC = () => {
         try {
           const data = (await getMessages(user.id)) as any[];
           setMessages(data);
+
+          // Fetch user data for conversations
+          const userIds = Array.from(
+            new Set(
+              data.map((msg) =>
+                msg.senderId === user.id ? msg.receiverId : msg.senderId,
+              ),
+            ),
+          );
+
+          const userPromises = userIds.map((id) => getUserById(id));
+          const users = await Promise.all(userPromises);
+          const userMap: any = {};
+          users.forEach((u, index) => {
+            userMap[userIds[index]] = u;
+          });
+          setConversationUsers(userMap);
+
           setLoading(false);
         } catch (error) {
           console.error("Error fetching messages:", error);
@@ -26,17 +49,49 @@ const Messages: React.FC = () => {
       };
 
       fetchMessages();
+
+      // Subscribe to new messages
+      const subscription = supabase
+        .channel("messages")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload) => {
+            const newMessage = payload.new;
+            if (
+              newMessage.senderId === user.id ||
+              newMessage.receiverId === user.id
+            ) {
+              setMessages((prev) => [...prev, newMessage]);
+            }
+          },
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, [user]);
 
+  useEffect(() => {
+    if (contact && typeof contact === "string") {
+      setSelectedConversation(contact);
+    }
+  }, [contact]);
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+    if (!newMessage.trim() || !user || !selectedConversation) return;
 
     try {
       const message = {
         id: Date.now().toString(),
         senderId: user.id,
-        receiverId: "user2", // This would be dynamic in a real app
+        receiverId: selectedConversation,
         content: newMessage,
         timestamp: new Date().toISOString(),
       };
@@ -93,13 +148,14 @@ const Messages: React.FC = () => {
               {conversations.map((conversationId) => {
                 const conversationMessages = messages.filter(
                   (msg) =>
-                    (msg.senderId === user.id &&
+                    (msg.senderId === user?.id &&
                       msg.receiverId === conversationId) ||
                     (msg.senderId === conversationId &&
-                      msg.receiverId === user.id),
+                      msg.receiverId === user?.id),
                 );
                 const lastMessage =
                   conversationMessages[conversationMessages.length - 1];
+                const otherUser = conversationUsers[conversationId];
 
                 return (
                   <div
@@ -113,13 +169,13 @@ const Messages: React.FC = () => {
                   >
                     <div className="flex items-center">
                       <img
-                        src="/default-avatar.jpg"
-                        alt="User"
+                        src={otherUser?.avatar || "/default-avatar.jpg"}
+                        alt={otherUser?.name || "User"}
                         className="w-10 h-10 rounded-full mr-3"
                       />
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900">
-                          User {conversationId}
+                          {otherUser?.name || `User ${conversationId}`}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
                           {lastMessage?.content}

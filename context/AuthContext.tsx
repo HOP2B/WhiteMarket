@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 interface AuthContextType {
   user: any;
@@ -13,13 +13,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
   const login = (userData: any) => {
     // Not needed with Clerk
   };
 
   const logout = () => {
-    // Not needed with Clerk
+    signOut();
   };
 
   if (!isLoaded) {

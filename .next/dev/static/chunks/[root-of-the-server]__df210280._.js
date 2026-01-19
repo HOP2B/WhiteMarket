@@ -482,18 +482,19 @@ const AuthContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project
 const AuthProvider = ({ children })=>{
     _s();
     const { user, isLoaded } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["useUser"])();
+    const { signOut } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["useClerk"])();
     const login = (userData)=>{
     // Not needed with Clerk
     };
     const logout = ()=>{
-    // Not needed with Clerk
+        signOut();
     };
     if (!isLoaded) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             children: "Loading..."
         }, void 0, false, {
             fileName: "[project]/context/AuthContext.tsx",
-            lineNumber: 26,
+            lineNumber: 27,
             columnNumber: 12
         }, ("TURBOPACK compile-time value", void 0));
     }
@@ -506,13 +507,14 @@ const AuthProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/context/AuthContext.tsx",
-        lineNumber: 30,
+        lineNumber: 31,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s(AuthProvider, "ZUuuSKp+2uHP0mhnxk9mE4npcsg=", false, function() {
+_s(AuthProvider, "CulcM6w/XYrUVInprP5UUVxud9U=", false, function() {
     return [
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["useUser"]
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["useUser"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["useClerk"]
     ];
 });
 _c = AuthProvider;

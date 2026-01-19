@@ -77,18 +77,19 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$s
 const AuthContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["createContext"])(undefined);
 const AuthProvider = ({ children })=>{
     const { user, isLoaded } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$ssr$5d$__$28$ecmascript$29$__["useUser"])();
+    const { signOut } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$shared$2f$dist$2f$runtime$2f$react$2f$index$2e$mjs__$5b$ssr$5d$__$28$ecmascript$29$__["useClerk"])();
     const login = (userData)=>{
     // Not needed with Clerk
     };
     const logout = ()=>{
-    // Not needed with Clerk
+        signOut();
     };
     if (!isLoaded) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
             children: "Loading..."
         }, void 0, false, {
             fileName: "[project]/context/AuthContext.tsx",
-            lineNumber: 26,
+            lineNumber: 27,
             columnNumber: 12
         }, ("TURBOPACK compile-time value", void 0));
     }
@@ -101,7 +102,7 @@ const AuthProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/context/AuthContext.tsx",
-        lineNumber: 30,
+        lineNumber: 31,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };

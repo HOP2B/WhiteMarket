@@ -1,9 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
+import { UserButton } from "@clerk/nextjs";
 
 const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -28,39 +29,43 @@ const Navbar: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/dashboard"
-                  className="text-gray-700 hover:text-green-600"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
                 >
                   Dashboard
                 </Link>
+                {user.unsafeMetadata?.role === "worker" && (
+                  <Link
+                    href="/offer-service"
+                    className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+                  >
+                    Offer Service
+                  </Link>
+                )}
                 <Link
                   href="/messages"
-                  className="text-gray-700 hover:text-green-600"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
                 >
                   Messages
                 </Link>
-                <button
-                  onClick={logout}
-                  className="text-gray-700 hover:text-green-600"
-                >
-                  Logout
-                </button>
-                <img
-                  src={user.avatar || "/default-avatar.jpg"}
-                  alt="User Avatar"
-                  className="w-8 h-8 rounded-full"
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                    },
+                  }}
                 />
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className="text-gray-700 hover:text-green-600"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-200"
                 >
                   Sign Up
                 </Link>
