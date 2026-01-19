@@ -11,9 +11,9 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/node_modules_swr_dist_85285875._.js",
       "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
       "static/chunks/node_modules_6ee9748a._.js",
-      "static/chunks/[root-of-the-server]__27d59cab._.js",
+      "static/chunks/[root-of-the-server]__10b1e4c4._.js",
       "static/chunks/pages_index_2da965e7._.js",
-      "static/chunks/turbopack-pages_index_2dc12619._.js"
+      "static/chunks/turbopack-pages_index_0501ffa4._.js"
     ],
     "/_app": [
       "static/chunks/node_modules_@clerk_nextjs_dist_esm_a8aed3d1._.js",

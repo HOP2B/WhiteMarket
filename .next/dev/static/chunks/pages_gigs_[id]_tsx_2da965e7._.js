@@ -11,7 +11,7 @@
   "static/chunks/node_modules_swr_dist_85285875._.js",
   "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
   "static/chunks/node_modules_6ee9748a._.js",
-  "static/chunks/[root-of-the-server]__5c415b82._.js"
+  "static/chunks/[root-of-the-server]__661430ff._.js"
 ],
     source: "entry"
 });

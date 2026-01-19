@@ -1,28 +1,44 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getGigs } from "../api/mockApi";
+import { getGigs, getOrders } from "../api/mockApi";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const [gigs, setGigs] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [quickCreateData, setQuickCreateData] = useState({
+    title: "",
+    description: "",
+    price: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    const fetchGigs = async () => {
+    const fetchData = async () => {
+      if (!user) return;
+
       try {
-        const data = (await getGigs()) as any[];
-        setGigs(data);
+        const [gigsData, ordersData] = await Promise.all([
+          getGigs(),
+          getOrders(user.id),
+        ]);
+        setGigs(gigsData);
+        setOrders(ordersData);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching gigs:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
 
-    fetchGigs();
-  }, []);
+    fetchData();
+  }, [user]);
 
   if (loading) {
     return (
@@ -46,6 +62,66 @@ const Dashboard: React.FC = () => {
   }
 
   const userGigs = gigs.filter((gig) => gig.userId === user.id);
+  const recentGigs = gigs.slice(0, 6); // Show 6 most recent gigs
+
+  const handleQuickCreate = async () => {
+    if (
+      !user ||
+      !quickCreateData.title ||
+      !quickCreateData.description ||
+      !quickCreateData.price
+    ) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      // Simulate API call to MySQL database
+      const newGig = {
+        id: Date.now().toString(),
+        title: quickCreateData.title,
+        description: quickCreateData.description,
+        price: parseFloat(quickCreateData.price),
+        category: "General",
+        user_id: user.id,
+        userId: user.id,
+        userName: user.name || "Unknown User",
+        userAvatar: user.imageUrl || "/default-avatar.jpg",
+        rating: 0,
+        reviews: 0,
+      };
+
+      // Simulate POST request to MySQL database
+      console.log("Sending POST request to MySQL database:", newGig);
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Update local state (in real app, this would be handled by real-time updates)
+      const updatedGigs = [newGig, ...gigs];
+      setGigs(updatedGigs);
+
+      // Reset form and close modal
+      setQuickCreateData({ title: "", description: "", price: "" });
+      setShowQuickCreate(false);
+
+      alert("Үйлчилгээ амжилттай үүсгэгдлээ!");
+    } catch (error) {
+      console.error("Error creating gig:", error);
+      alert("Үйлчилгээ үүсгэхэд алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setCreating(false);
+    }
+  };
+  const userOrders = orders.filter(
+    (order) => order.buyer_id === user.id || order.seller_id === user.id,
+  );
+  const totalEarnings = orders
+    .filter(
+      (order) => order.seller_id === user.id && order.status === "completed",
+    )
+    .reduce((sum, order) => sum + order.amount, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -89,7 +165,7 @@ const Dashboard: React.FC = () => {
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  My Gigs
+                  Recent Jobs
                 </button>
                 <button
                   onClick={() => setActiveTab("orders")}
@@ -139,11 +215,13 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="bg-blue-600 text-white rounded-lg p-6">
                     <h3 className="text-lg font-semibold mb-2">Total Orders</h3>
-                    <p className="text-3xl font-bold">12</p>
+                    <p className="text-3xl font-bold">{userOrders.length}</p>
                   </div>
                   <div className="bg-yellow-600 text-white rounded-lg p-6">
                     <h3 className="text-lg font-semibold mb-2">Earnings</h3>
-                    <p className="text-3xl font-bold">$1,250</p>
+                    <p className="text-3xl font-bold">
+                      ${totalEarnings.toFixed(2)}
+                    </p>
                   </div>
                 </div>
 
@@ -182,18 +260,23 @@ const Dashboard: React.FC = () => {
             {activeTab === "gigs" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">My Gigs</h2>
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    Create New Gig
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Recent Jobs
+                  </h2>
+                  <button
+                    onClick={() => router.push("/offer-service")}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  >
+                    Create New Service
                   </button>
                 </div>
 
-                {userGigs.length > 0 ? (
+                {recentGigs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {userGigs.map((gig) => (
+                    {recentGigs.map((gig) => (
                       <div
                         key={gig.id}
-                        className="border border-gray-200 rounded-lg p-4"
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-center mb-4">
                           <img
@@ -201,27 +284,33 @@ const Dashboard: React.FC = () => {
                             alt={gig.userName}
                             className="w-12 h-12 rounded-full mr-4"
                           />
-                          <div>
+                          <div className="flex-1">
                             <h3 className="font-semibold text-gray-900">
                               {gig.title}
                             </h3>
                             <p className="text-sm text-gray-600">
-                              ${gig.price}
+                              by {gig.userName}
                             </p>
                           </div>
+                          <span className="text-green-600 font-bold text-lg">
+                            ₮{gig.price.toLocaleString()}
+                          </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-4">
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                           {gig.description}
                         </p>
-                        <div className="flex space-x-2">
-                          <button className="text-green-600 hover:text-green-700 text-sm">
-                            Edit
-                          </button>
-                          <button className="text-red-600 hover:text-red-700 text-sm">
-                            Delete
-                          </button>
-                          <button className="text-blue-600 hover:text-blue-700 text-sm">
-                            View
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="text-yellow-500 text-sm">★</span>
+                            <span className="ml-1 text-sm text-gray-600">
+                              {gig.rating} ({gig.reviews} reviews)
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => router.push(`/gigs/${gig.id}`)}
+                            className="text-green-600 hover:text-green-700 text-sm font-medium"
+                          >
+                            View Details
                           </button>
                         </div>
                       </div>
@@ -230,10 +319,13 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-gray-500 mb-4">
-                      You haven't created any gigs yet.
+                      No services available yet.
                     </p>
-                    <button className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
-                      Create Your First Gig
+                    <button
+                      onClick={() => router.push("/offer-service")}
+                      className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+                    >
+                      Create First Service
                     </button>
                   </div>
                 )}
@@ -245,32 +337,42 @@ const Dashboard: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Orders
                 </h2>
-                <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-gray-900">
-                        Logo Design
-                      </h3>
-                      <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">
-                        Completed
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">$50.00</p>
-                    <p className="text-gray-500 text-sm">Order #12345</p>
+                {userOrders.length > 0 ? (
+                  <div className="space-y-4">
+                    {userOrders.map((order) => (
+                      <div
+                        key={order.id}
+                        className="border border-gray-200 rounded-lg p-4"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="font-semibold text-gray-900">
+                            {order.gigs.title}
+                          </h3>
+                          <span
+                            className={`text-sm px-2 py-1 rounded-full ${
+                              order.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">
+                          ${order.amount}
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          Order #{order.id}
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-gray-900">
-                        Website Development
-                      </h3>
-                      <span className="bg-yellow-100 text-yellow-800 text-sm px-2 py-1 rounded-full">
-                        In Progress
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">$500.00</p>
-                    <p className="text-gray-500 text-sm">Order #12346</p>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-gray-500">No orders yet.</p>
+                )}
               </div>
             )}
 

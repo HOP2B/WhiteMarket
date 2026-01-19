@@ -1,45 +1,33 @@
 import { supabase } from "../lib/supabase";
+import { mockGigs, mockUsers } from "../data/mockData";
 
 export const getGigs = async () => {
-  const { data, error } = await supabase
-    .from("gigs")
-    .select(
-      `
-      *,
-      users!inner(name, avatar)
-    `,
-    )
-    .order("id");
-
-  if (error) throw error;
-
-  // Transform to match mock data structure
-  return data.map((gig) => ({
-    ...gig,
-    userName: gig.users.name,
-    userAvatar: gig.users.avatar,
-  }));
+  // Use mock data for development
+  return mockGigs.map((gig) => {
+    const mockUser = mockUsers.find((user) => user.id === gig.userId);
+    return {
+      ...gig,
+      userName: mockUser?.name || gig.userName,
+      userAvatar: mockUser?.avatar || gig.userAvatar,
+      userId: gig.userId,
+    };
+  });
 };
 
 export const getGigById = async (id: string) => {
-  const { data, error } = await supabase
-    .from("gigs")
-    .select(
-      `
-      *,
-      users!inner(name, avatar)
-    `,
-    )
-    .eq("id", id)
-    .single();
+  // Use mock data for development
+  const mockGig = mockGigs.find((gig) => gig.id === id);
+  if (mockGig) {
+    const mockUser = mockUsers.find((user) => user.id === mockGig.userId);
+    return {
+      ...mockGig,
+      userName: mockUser?.name || mockGig.userName,
+      userAvatar: mockUser?.avatar || mockGig.userAvatar,
+      userId: mockGig.userId,
+    };
+  }
 
-  if (error) throw error;
-
-  return {
-    ...data,
-    userName: data.users.name,
-    userAvatar: data.users.avatar,
-  };
+  throw new Error(`Gig with id ${id} not found`);
 };
 
 export const getUserById = async (id: string) => {
@@ -90,4 +78,27 @@ export const sendMessage = async (message: any) => {
 
   if (error) throw error;
   return data;
+};
+
+export const createOrder = async (order: any) => {
+  // Simulate order creation (database not set up yet)
+  console.log("Simulating order creation:", order);
+  return { ...order, id: Date.now().toString() };
+};
+
+export const getOrders = async (userId: string) => {
+  // Return mock orders for development
+  return [
+    {
+      id: "1",
+      gig_id: "1",
+      buyer_id: userId,
+      seller_id: "user1",
+      amount: 50000,
+      status: "completed",
+      created_at: "2024-01-15T10:00:00Z",
+      gigs: { title: "Logo Design", price: 50000, user_id: "user1" },
+      users: { name: "John Doe", avatar: "/avatars/john-doe.jpg" },
+    },
+  ];
 };

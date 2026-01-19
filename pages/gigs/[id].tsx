@@ -13,11 +13,41 @@ const GigDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const handleContactSeller = () => {
-    if (user && gig) {
-      router.push(`/messages?contact=${gig.userId}`);
-    } else {
+    console.log("handleContactSeller called");
+    console.log("user:", user);
+    console.log("gig:", gig);
+    console.log("gig?.userId:", gig?.userId);
+    console.log("loading:", loading);
+
+    if (!user) {
       router.push("/login");
+      return;
     }
+
+    if (loading) {
+      alert("Please wait for the page to load completely");
+      return;
+    }
+
+    if (!gig) {
+      alert("Service information not available");
+      return;
+    }
+
+    if (!gig.userId) {
+      console.error("No userId found for gig:", gig);
+      alert("Unable to contact seller - missing seller information");
+      return;
+    }
+
+    // Ensure userId is not the same as current user
+    if (gig.userId === user.id) {
+      alert("You cannot contact yourself");
+      return;
+    }
+
+    console.log("Navigating to messages with contact:", gig.userId);
+    router.push(`/messages?contact=${gig.userId}`);
   };
 
   useEffect(() => {
@@ -130,22 +160,26 @@ const GigDetail: React.FC = () => {
               <div className="lg:w-1/3">
                 <div className="bg-gray-50 rounded-lg p-6 sticky top-8">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-gray-600">Starting at</span>
+                    <span className="text-gray-600">Эхлэх үнэ</span>
                     <span className="text-3xl font-bold text-green-600">
-                      ${gig.price}
+                      ₮{gig.price.toLocaleString()}
                     </span>
                   </div>
 
-                  <button className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 mb-4">
-                    Continue (${gig.price})
+                  <button
+                    onClick={() => router.push(`/checkout?gigId=${gig.id}`)}
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 mb-4"
+                  >
+                    Ажилд авлах (₮{gig.price.toLocaleString()})
                   </button>
 
                   <div className="space-y-3">
                     <button
                       onClick={handleContactSeller}
-                      className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200"
+                      disabled={loading}
+                      className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Contact Seller
+                      {loading ? "Уншиж байна..." : "Холбоо барих"}
                     </button>
                     <button className="w-full border border-gray-300 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200">
                       Add to Favorites

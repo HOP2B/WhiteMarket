@@ -95,6 +95,24 @@ const Navbar = ()=>{
                                         lineNumber: 44,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/payment-methods",
+                                        className: "text-gray-700 hover:text-green-600 transition-colors duration-200",
+                                        children: "Төлбөрийн арга"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/Navbar.tsx",
+                                        lineNumber: 50,
+                                        columnNumber: 17
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/subscription",
+                                        className: "text-gray-700 hover:text-green-600 transition-colors duration-200",
+                                        children: "Төлөвлөгөө"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/Navbar.tsx",
+                                        lineNumber: 56,
+                                        columnNumber: 17
+                                    }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$clerk$2d$react$2f$dist$2f$chunk$2d$6WD75OPE$2e$mjs__$5b$ssr$5d$__$28$ecmascript$29$__["UserButton"], {
                                         appearance: {
                                             elements: {
@@ -103,7 +121,7 @@ const Navbar = ()=>{
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 62,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
@@ -120,7 +138,7 @@ const Navbar = ()=>{
                                         children: "Login"
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 60,
+                                        lineNumber: 72,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -129,13 +147,13 @@ const Navbar = ()=>{
                                         children: "Sign Up"
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 66,
+                                        lineNumber: 78,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/Navbar.tsx",
-                                lineNumber: 59,
+                                lineNumber: 71,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
@@ -189,12 +207,16 @@ __turbopack_async_result__();
 return __turbopack_context__.a(async (__turbopack_handle_async_dependencies__, __turbopack_async_result__) => { try {
 
 __turbopack_context__.s([
+    "createOrder",
+    ()=>createOrder,
     "getGigById",
     ()=>getGigById,
     "getGigs",
     ()=>getGigs,
     "getMessages",
     ()=>getMessages,
+    "getOrders",
+    ()=>getOrders,
     "getUserById",
     ()=>getUserById,
     "sendMessage",
@@ -216,7 +238,8 @@ const getGigs = async ()=>{
     return data.map((gig)=>({
             ...gig,
             userName: gig.users.name,
-            userAvatar: gig.users.avatar
+            userAvatar: gig.users.avatar,
+            userId: gig.user_id
         }));
 };
 const getGigById = async (id)=>{
@@ -228,7 +251,8 @@ const getGigById = async (id)=>{
     return {
         ...data,
         userName: data.users.name,
-        userAvatar: data.users.avatar
+        userAvatar: data.users.avatar,
+        userId: data.user_id
     };
 };
 const getUserById = async (id)=>{
@@ -260,6 +284,22 @@ const getMessages = async (userId)=>{
 };
 const sendMessage = async (message)=>{
     const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(message).select().single();
+    if (error) throw error;
+    return data;
+};
+const createOrder = async (order)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("orders").insert(order).select().single();
+    if (error) throw error;
+    return data;
+};
+const getOrders = async (userId)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("orders").select(`
+      *,
+      gigs!inner(title, price, user_id),
+      users!sender_id(name, avatar)
+    `).or(`buyer_id.eq.${userId},gigs.user_id.eq.${userId}`).order("created_at", {
+        ascending: false
+    });
     if (error) throw error;
     return data;
 };
@@ -299,7 +339,14 @@ const GigDetail = ()=>{
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(true);
     const handleContactSeller = ()=>{
         if (user && gig) {
-            router.push(`/messages?contact=${gig.userId}`);
+            console.log("Gig data:", gig);
+            console.log("UserId:", gig.userId);
+            if (gig.userId) {
+                router.push(`/messages?contact=${gig.userId}`);
+            } else {
+                console.error("No userId found for gig:", gig);
+                alert("Unable to contact seller - missing user information");
+            }
         } else {
             router.push("/login");
         }
@@ -332,12 +379,12 @@ const GigDetail = ()=>{
                 className: "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"
             }, void 0, false, {
                 fileName: "[project]/pages/gigs/[id].tsx",
-                lineNumber: 47,
+                lineNumber: 54,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0))
         }, void 0, false, {
             fileName: "[project]/pages/gigs/[id].tsx",
-            lineNumber: 46,
+            lineNumber: 53,
             columnNumber: 7
         }, ("TURBOPACK compile-time value", void 0));
     }
@@ -347,7 +394,7 @@ const GigDetail = ()=>{
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$Navbar$2e$tsx__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                     fileName: "[project]/pages/gigs/[id].tsx",
-                    lineNumber: 55,
+                    lineNumber: 62,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -357,18 +404,18 @@ const GigDetail = ()=>{
                         children: "Gig not found"
                     }, void 0, false, {
                         fileName: "[project]/pages/gigs/[id].tsx",
-                        lineNumber: 57,
+                        lineNumber: 64,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 }, void 0, false, {
                     fileName: "[project]/pages/gigs/[id].tsx",
-                    lineNumber: 56,
+                    lineNumber: 63,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0))
             ]
         }, void 0, true, {
             fileName: "[project]/pages/gigs/[id].tsx",
-            lineNumber: 54,
+            lineNumber: 61,
             columnNumber: 7
         }, ("TURBOPACK compile-time value", void 0));
     }
@@ -377,7 +424,7 @@ const GigDetail = ()=>{
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$Navbar$2e$tsx__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/pages/gigs/[id].tsx",
-                lineNumber: 65,
+                lineNumber: 72,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -397,7 +444,7 @@ const GigDetail = ()=>{
                                             children: gig.title
                                         }, void 0, false, {
                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                            lineNumber: 71,
+                                            lineNumber: 78,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -409,7 +456,7 @@ const GigDetail = ()=>{
                                                     className: "w-12 h-12 rounded-full mr-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 75,
+                                                    lineNumber: 82,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -419,7 +466,7 @@ const GigDetail = ()=>{
                                                             children: seller?.name
                                                         }, void 0, false, {
                                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                                            lineNumber: 81,
+                                                            lineNumber: 88,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -430,7 +477,7 @@ const GigDetail = ()=>{
                                                                     children: "★"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 85,
+                                                                    lineNumber: 92,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -438,7 +485,7 @@ const GigDetail = ()=>{
                                                                     children: gig.rating
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 86,
+                                                                    lineNumber: 93,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -450,25 +497,25 @@ const GigDetail = ()=>{
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 87,
+                                                                    lineNumber: 94,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                                            lineNumber: 84,
+                                                            lineNumber: 91,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 80,
+                                                    lineNumber: 87,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                            lineNumber: 74,
+                                            lineNumber: 81,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -480,7 +527,7 @@ const GigDetail = ()=>{
                                                     className: "w-full h-64 object-cover rounded-lg mb-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 95,
+                                                    lineNumber: 102,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -488,13 +535,13 @@ const GigDetail = ()=>{
                                                     children: gig.description
                                                 }, void 0, false, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 100,
+                                                    lineNumber: 107,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                            lineNumber: 94,
+                                            lineNumber: 101,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -505,7 +552,7 @@ const GigDetail = ()=>{
                                                     children: "About This Gig"
                                                 }, void 0, false, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 104,
+                                                    lineNumber: 111,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -519,7 +566,7 @@ const GigDetail = ()=>{
                                                                     children: "Category:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 109,
+                                                                    lineNumber: 116,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -527,13 +574,13 @@ const GigDetail = ()=>{
                                                                     children: gig.category
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 110,
+                                                                    lineNumber: 117,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                                            lineNumber: 108,
+                                                            lineNumber: 115,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -544,7 +591,7 @@ const GigDetail = ()=>{
                                                                     children: "Delivery Time:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 115,
+                                                                    lineNumber: 122,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -552,13 +599,13 @@ const GigDetail = ()=>{
                                                                     children: "3 Days"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 116,
+                                                                    lineNumber: 123,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                                            lineNumber: 114,
+                                                            lineNumber: 121,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -569,7 +616,7 @@ const GigDetail = ()=>{
                                                                     children: "Revisions:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 121,
+                                                                    lineNumber: 128,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -577,31 +624,31 @@ const GigDetail = ()=>{
                                                                     children: "Unlimited"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                                    lineNumber: 122,
+                                                                    lineNumber: 129,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                                            lineNumber: 120,
+                                                            lineNumber: 127,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                                    lineNumber: 107,
+                                                    lineNumber: 114,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/pages/gigs/[id].tsx",
-                                            lineNumber: 103,
+                                            lineNumber: 110,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                    lineNumber: 70,
+                                    lineNumber: 77,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -617,7 +664,7 @@ const GigDetail = ()=>{
                                                         children: "Starting at"
                                                     }, void 0, false, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 133,
+                                                        lineNumber: 140,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -628,25 +675,26 @@ const GigDetail = ()=>{
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 134,
+                                                        lineNumber: 141,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                lineNumber: 132,
+                                                lineNumber: 139,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>router.push(`/checkout?gigId=${gig.id}`),
                                                 className: "w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 mb-4",
                                                 children: [
-                                                    "Continue ($",
+                                                    "Hire Now ($",
                                                     gig.price,
                                                     ")"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                lineNumber: 139,
+                                                lineNumber: 146,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -658,7 +706,7 @@ const GigDetail = ()=>{
                                                         children: "Contact Seller"
                                                     }, void 0, false, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 144,
+                                                        lineNumber: 154,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
@@ -666,13 +714,13 @@ const GigDetail = ()=>{
                                                         children: "Add to Favorites"
                                                     }, void 0, false, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 150,
+                                                        lineNumber: 160,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                lineNumber: 143,
+                                                lineNumber: 153,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -683,7 +731,7 @@ const GigDetail = ()=>{
                                                         children: "What's Included"
                                                     }, void 0, false, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 156,
+                                                        lineNumber: 166,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("ul", {
@@ -697,14 +745,14 @@ const GigDetail = ()=>{
                                                                         children: "✓"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                                        lineNumber: 161,
+                                                                        lineNumber: 171,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     "Basic Package"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                                lineNumber: 160,
+                                                                lineNumber: 170,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("li", {
@@ -715,14 +763,14 @@ const GigDetail = ()=>{
                                                                         children: "✓"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                                        lineNumber: 165,
+                                                                        lineNumber: 175,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     "3 Revisions"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                                lineNumber: 164,
+                                                                lineNumber: 174,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("li", {
@@ -733,64 +781,64 @@ const GigDetail = ()=>{
                                                                         children: "✓"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                                        lineNumber: 169,
+                                                                        lineNumber: 179,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     "3 Days Delivery"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                                lineNumber: 168,
+                                                                lineNumber: 178,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                                        lineNumber: 159,
+                                                        lineNumber: 169,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/pages/gigs/[id].tsx",
-                                                lineNumber: 155,
+                                                lineNumber: 165,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/pages/gigs/[id].tsx",
-                                        lineNumber: 131,
+                                        lineNumber: 138,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 }, void 0, false, {
                                     fileName: "[project]/pages/gigs/[id].tsx",
-                                    lineNumber: 130,
+                                    lineNumber: 137,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/pages/gigs/[id].tsx",
-                            lineNumber: 69,
+                            lineNumber: 76,
                             columnNumber: 13
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/pages/gigs/[id].tsx",
-                        lineNumber: 68,
+                        lineNumber: 75,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 }, void 0, false, {
                     fileName: "[project]/pages/gigs/[id].tsx",
-                    lineNumber: 67,
+                    lineNumber: 74,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0))
             }, void 0, false, {
                 fileName: "[project]/pages/gigs/[id].tsx",
-                lineNumber: 66,
+                lineNumber: 73,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/pages/gigs/[id].tsx",
-        lineNumber: 64,
+        lineNumber: 71,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };

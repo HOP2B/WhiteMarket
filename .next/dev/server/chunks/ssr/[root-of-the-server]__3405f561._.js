@@ -95,6 +95,24 @@ const Navbar = ()=>{
                                         lineNumber: 44,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/payment-methods",
+                                        className: "text-gray-700 hover:text-green-600 transition-colors duration-200",
+                                        children: "Төлбөрийн арга"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/Navbar.tsx",
+                                        lineNumber: 50,
+                                        columnNumber: 17
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                        href: "/subscription",
+                                        className: "text-gray-700 hover:text-green-600 transition-colors duration-200",
+                                        children: "Төлөвлөгөө"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/Navbar.tsx",
+                                        lineNumber: 56,
+                                        columnNumber: 17
+                                    }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$clerk$2f$clerk$2d$react$2f$dist$2f$chunk$2d$6WD75OPE$2e$mjs__$5b$ssr$5d$__$28$ecmascript$29$__["UserButton"], {
                                         appearance: {
                                             elements: {
@@ -103,7 +121,7 @@ const Navbar = ()=>{
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 62,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
@@ -120,7 +138,7 @@ const Navbar = ()=>{
                                         children: "Login"
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 60,
+                                        lineNumber: 72,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -129,13 +147,13 @@ const Navbar = ()=>{
                                         children: "Sign Up"
                                     }, void 0, false, {
                                         fileName: "[project]/components/Navbar.tsx",
-                                        lineNumber: 66,
+                                        lineNumber: 78,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/Navbar.tsx",
-                                lineNumber: 59,
+                                lineNumber: 71,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
@@ -189,12 +207,16 @@ __turbopack_async_result__();
 return __turbopack_context__.a(async (__turbopack_handle_async_dependencies__, __turbopack_async_result__) => { try {
 
 __turbopack_context__.s([
+    "createOrder",
+    ()=>createOrder,
     "getGigById",
     ()=>getGigById,
     "getGigs",
     ()=>getGigs,
     "getMessages",
     ()=>getMessages,
+    "getOrders",
+    ()=>getOrders,
     "getUserById",
     ()=>getUserById,
     "sendMessage",
@@ -216,7 +238,8 @@ const getGigs = async ()=>{
     return data.map((gig)=>({
             ...gig,
             userName: gig.users.name,
-            userAvatar: gig.users.avatar
+            userAvatar: gig.users.avatar,
+            userId: gig.user_id
         }));
 };
 const getGigById = async (id)=>{
@@ -228,7 +251,8 @@ const getGigById = async (id)=>{
     return {
         ...data,
         userName: data.users.name,
-        userAvatar: data.users.avatar
+        userAvatar: data.users.avatar,
+        userId: data.user_id
     };
 };
 const getUserById = async (id)=>{
@@ -260,6 +284,22 @@ const getMessages = async (userId)=>{
 };
 const sendMessage = async (message)=>{
     const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(message).select().single();
+    if (error) throw error;
+    return data;
+};
+const createOrder = async (order)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("orders").insert(order).select().single();
+    if (error) throw error;
+    return data;
+};
+const getOrders = async (userId)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("orders").select(`
+      *,
+      gigs!inner(title, price, user_id),
+      users!sender_id(name, avatar)
+    `).or(`buyer_id.eq.${userId},gigs.user_id.eq.${userId}`).order("created_at", {
+        ascending: false
+    });
     if (error) throw error;
     return data;
 };

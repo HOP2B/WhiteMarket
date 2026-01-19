@@ -9,7 +9,7 @@ __turbopack_load_page_chunks__("/messages", [
   "static/chunks/node_modules_swr_dist_85285875._.js",
   "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
   "static/chunks/node_modules_6ee9748a._.js",
-  "static/chunks/[root-of-the-server]__dee1fa06._.js",
+  "static/chunks/[root-of-the-server]__2b78a0a0._.js",
   "static/chunks/pages_messages_2da965e7._.js",
-  "static/chunks/turbopack-pages_messages_928ee74b._.js"
+  "static/chunks/turbopack-pages_messages_a5713e63._.js"
 ])

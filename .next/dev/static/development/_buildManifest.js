@@ -14,6 +14,7 @@ self.__BUILD_MANIFEST = {
     "/",
     "/_app",
     "/_error",
+    "/checkout",
     "/dashboard",
     "/gigs/[id]",
     "/jobs",
@@ -22,7 +23,9 @@ self.__BUILD_MANIFEST = {
     "/login/[[...index]]",
     "/messages",
     "/offer-service",
+    "/payment-methods",
     "/profile/[id]",
-    "/register/[[...index]]"
+    "/register/[[...index]]",
+    "/subscription"
   ]
 };self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()

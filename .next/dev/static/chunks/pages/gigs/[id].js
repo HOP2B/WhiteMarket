@@ -9,7 +9,7 @@ __turbopack_load_page_chunks__("/gigs/[id]", [
   "static/chunks/node_modules_swr_dist_85285875._.js",
   "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
   "static/chunks/node_modules_6ee9748a._.js",
-  "static/chunks/[root-of-the-server]__5c415b82._.js",
+  "static/chunks/[root-of-the-server]__661430ff._.js",
   "static/chunks/pages_gigs_[id]_tsx_2da965e7._.js",
-  "static/chunks/turbopack-pages_gigs_[id]_tsx_311b3b47._.js"
+  "static/chunks/turbopack-pages_gigs_[id]_tsx_15a8230f._.js"
 ])

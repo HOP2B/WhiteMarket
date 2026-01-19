@@ -47,6 +47,18 @@ const Navbar: React.FC = () => {
                 >
                   Messages
                 </Link>
+                <Link
+                  href="/payment-methods"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+                >
+                  Төлбөрийн арга
+                </Link>
+                <Link
+                  href="/subscription"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+                >
+                  Төлөвлөгөө
+                </Link>
                 <UserButton
                   appearance={{
                     elements: {
