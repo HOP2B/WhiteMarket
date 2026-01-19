@@ -1,0 +1,35 @@
+[00:00:00.730] Server  LOG     ✓ Ready in 477ms
+[00:00:04.576] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:00:05.593] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:00:05.809] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:00:06.284] Browser ERROR   %o
+
+%s
+
+%s
+ {} The above error occurred in the <SignIn> component. React will try to recreate this component tree from scratch using the error boundary you provided, PagesDevOverlayErrorBoundary.
+[00:00:19.433] Server  ERROR   Error: useAuth must be used within an AuthProvider
+[00:00:19.435] Server  ERROR   ⨯ Error: useAuth must be used within an AuthProvider
+[00:00:19.436] Server  ERROR   ⨯ Error: useAuth must be used within an AuthProvider
+[00:00:19.612] Browser ERROR   uncaughtError: Error: useAuth must be used within an AuthProvider
+[00:01:01.135] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:01:01.149] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:01:01.268] Server  LOG     ✓ Compiled in 147ms
+[00:01:56.177] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:01:57.077] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:02:02.595] Browser ERROR   %o
+
+%s
+
+%s
+ {} The above error occurred in the <SignIn> component. React will try to recreate this component tree from scratch using the error boundary you provided, PagesDevOverlayErrorBoundary.
+[00:02:02.595] Browser ERROR   %o
+
+%s
+
+%s
+ {} The above error occurred in the <SignIn> component. React will try to recreate this component tree from scratch using the error boundary you provided, PagesDevOverlayErrorBoundary.
+[00:03:32.325] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:03:32.735] Browser WARN    Clerk: The prop "redirectUrl" is deprecated and should be replaced with the new "fallbackRedirectUrl" or "forceRedirectUrl" props instead. Learn more: https://clerk.com/docs/guides/custom-redirects#redirect-url-props
+[00:03:33.027] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:03:33.724] Browser WARN    Clerk: The prop "redirectUrl" is deprecated and should be replaced with the new "fallbackRedirectUrl" or "forceRedirectUrl" props instead. Learn more: https://clerk.com/docs/guides/custom-redirects#redirect-url-props
