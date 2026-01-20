@@ -1,36 +1,52 @@
 import { supabase } from "../lib/supabase";
-import { mockGigs, mockUsers } from "../data/mockData";
 
 export const getGigs = async () => {
-  // Use mock data for development
-  return mockGigs.map((gig) => {
-    const mockUser = mockUsers.find((user) => user.id === gig.userId);
-    return {
-      ...gig,
-      userName: mockUser?.name || gig.userName,
-      userAvatar: mockUser?.avatar || gig.userAvatar,
-      userId: gig.userId,
-    };
-  });
+  const { data, error } = await supabase
+    .from("gigs")
+    .select(
+      `
+      *,
+      user:users!user_id(name, avatar)
+    `,
+    )
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching gigs:", error);
+    throw error;
+  }
+  console.log("Fetched gigs:", data);
+  return data.map((gig) => ({
+    ...gig,
+    userName: gig.user?.name || "Unknown",
+    userAvatar: gig.user?.avatar || "/default-avatar.jpg",
+    userId: gig.user_id,
+  }));
 };
 
 export const getGigById = async (id: string) => {
-  // Use mock data for development
-  const mockGig = mockGigs.find((gig) => gig.id === id);
-  if (mockGig) {
-    const mockUser = mockUsers.find((user) => user.id === mockGig.userId);
-    return {
-      ...mockGig,
-      userName: mockUser?.name || mockGig.userName,
-      userAvatar: mockUser?.avatar || mockGig.userAvatar,
-      userId: mockGig.userId,
-    };
-  }
+  console.log("getGigById called with id:", id);
+  const { data, error } = await supabase
+    .from("gigs")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  throw new Error(`Gig with id ${id} not found`);
+  if (error) {
+    console.error("Error fetching gig:", error);
+    throw error;
+  }
+  console.log("Fetched gig:", data);
+  return {
+    ...data,
+    userName: "Unknown",
+    userAvatar: "/default-avatar.jpg",
+    userId: data.user_id,
+  };
 };
 
 export const getUserById = async (id: string) => {
+  console.log("getUserById called with id:", id);
   const { data, error } = await supabase
     .from("users")
     .select("*")
@@ -38,6 +54,7 @@ export const getUserById = async (id: string) => {
     .single();
 
   if (error) {
+    console.error("Error fetching user:", error);
     // If user not found in database, return a default user
     // This handles cases where user signed up but no record in users table
     return {
@@ -49,6 +66,7 @@ export const getUserById = async (id: string) => {
       skills: [],
     };
   }
+  console.log("Fetched user:", data);
   return data;
 };
 
@@ -100,5 +118,296 @@ export const getOrders = async (userId: string) => {
       gigs: { title: "Logo Design", price: 50000, user_id: "user1" },
       users: { name: "John Doe", avatar: "/avatars/john-doe.jpg" },
     },
+    {
+      id: "2",
+      gig_id: "2",
+      buyer_id: userId,
+      seller_id: "user2",
+      amount: 75000,
+      status: "in_progress",
+      created_at: "2024-01-18T14:30:00Z",
+      gigs: { title: "Web Development", price: 75000, user_id: "user2" },
+      users: { name: "Jane Smith", avatar: "/avatars/jane-smith.jpg" },
+    },
   ];
+};
+
+// New API functions for enhanced functionality
+export const getReviews = async (gigId: string) => {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      `
+      *,
+      user:users(name, avatar)
+    `,
+    )
+    .eq("gig_id", gigId);
+
+  if (error) throw error;
+  return data.map((review) => ({
+    ...review,
+    userName: review.user?.name || "Unknown",
+    userAvatar: review.user?.avatar || "/default-avatar.jpg",
+  }));
+};
+
+export const createReview = async (review: any) => {
+  const newReview = {
+    ...review,
+    id: Date.now().toString(),
+    date: new Date().toISOString().split("T")[0],
+  };
+  const { data, error } = await supabase
+    .from("reviews")
+    .insert(newReview)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const getNotifications = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+export const markNotificationAsRead = async (notificationId: string) => {
+  const { data, error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("id", notificationId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const getFavorites = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("favorites")
+    .select(
+      `
+      *,
+      gig:gigs(title, description, price, category, userName, userAvatar)
+    `,
+    )
+    .eq("user_id", userId);
+
+  if (error) throw error;
+  return data;
+};
+
+export const addToFavorites = async (userId: string, gigId: string) => {
+  const newFavorite = {
+    id: Date.now().toString(),
+    user_id: userId,
+    gig_id: gigId,
+    created_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from("favorites")
+    .insert(newFavorite)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const removeFromFavorites = async (userId: string, gigId: string) => {
+  const { error } = await supabase
+    .from("favorites")
+    .delete()
+    .eq("user_id", userId)
+    .eq("gig_id", gigId);
+
+  if (error) throw error;
+  return true;
+};
+
+export const searchGigs = async (query: string, filters: any = {}) => {
+  let queryBuilder = supabase.from("gigs").select(`
+      *,
+      user:users!user_id(name, avatar)
+    `);
+
+  // Text search
+  if (query) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`,
+    );
+  }
+
+  // Category filter
+  if (filters.category) {
+    queryBuilder = queryBuilder.eq("category", filters.category);
+  }
+
+  // Price range filter
+  if (filters.minPrice) {
+    queryBuilder = queryBuilder.gte("price", filters.minPrice);
+  }
+  if (filters.maxPrice) {
+    queryBuilder = queryBuilder.lte("price", filters.maxPrice);
+  }
+
+  // Rating filter
+  if (filters.minRating) {
+    queryBuilder = queryBuilder.gte("rating", filters.minRating);
+  }
+
+  // Sort
+  if (filters.sortBy) {
+    switch (filters.sortBy) {
+      case "price_low":
+        queryBuilder = queryBuilder.order("price", { ascending: true });
+        break;
+      case "price_high":
+        queryBuilder = queryBuilder.order("price", { ascending: false });
+        break;
+      case "rating":
+        queryBuilder = queryBuilder.order("rating", { ascending: false });
+        break;
+      case "newest":
+        queryBuilder = queryBuilder.order("created_at", { ascending: false });
+        break;
+      default:
+        queryBuilder = queryBuilder.order("created_at", { ascending: false });
+        break;
+    }
+  } else {
+    queryBuilder = queryBuilder.order("id", { ascending: false });
+  }
+
+  const { data, error } = await queryBuilder;
+
+  if (error) {
+    console.error("Error fetching gigs:", error);
+    throw error;
+  }
+  console.log("Fetched gigs:", data);
+  return data.map((gig) => ({
+    ...gig,
+    userName: gig.user?.name || "Unknown",
+    userAvatar: gig.user?.avatar || "/default-avatar.jpg",
+    userId: gig.user_id,
+  }));
+};
+
+export const getCategories = async () => {
+  const { data, error } = await supabase.from("gigs").select("category");
+
+  if (error) throw error;
+  const categoryCount: { [key: string]: number } = {};
+  data.forEach((gig) => {
+    categoryCount[gig.category] = (categoryCount[gig.category] || 0) + 1;
+  });
+  return Object.entries(categoryCount).map(([name, count]) => ({
+    name,
+    count,
+  }));
+};
+
+export const getUserStats = async (userId: string) => {
+  const { data: userGigs, error: gigsError } = await supabase
+    .from("gigs")
+    .select("rating")
+    .eq("user_id", userId);
+
+  if (gigsError) throw gigsError;
+
+  const userOrders = await getOrders(userId);
+
+  return {
+    totalGigs: userGigs.length,
+    totalOrders: userOrders.length,
+    completedOrders: userOrders.filter((order) => order.status === "completed")
+      .length,
+    totalEarnings: userOrders
+      .filter(
+        (order) => order.seller_id === userId && order.status === "completed",
+      )
+      .reduce((sum, order) => sum + order.amount, 0),
+    averageRating:
+      userGigs.length > 0
+        ? userGigs.reduce((sum, gig) => sum + gig.rating, 0) / userGigs.length
+        : 0,
+  };
+};
+
+export const updateUserProfile = async (userId: string, updates: any) => {
+  // In a real app, this would update the database
+  console.log("Updating user profile:", userId, updates);
+  return { ...updates, id: userId };
+};
+
+export const createGig = async (gigData: any) => {
+  const {
+    title,
+    description,
+    price,
+    category,
+    images,
+    tags,
+    packages,
+    userId,
+    userName,
+    userAvatar,
+  } = gigData;
+
+  // Ensure user exists in users table
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (!existingUser) {
+    await supabase
+      .from("users")
+      .insert({ id: userId, name: userName, email: "", avatar: userAvatar });
+  }
+
+  const newGig = {
+    id: Date.now().toString(),
+    user_id: userId,
+    title,
+    description,
+    price,
+    category,
+    images: images || [],
+    tags: tags || [],
+    packages: packages || [],
+    rating: 0,
+    reviews: 0,
+  };
+  const { data, error } = await supabase
+    .from("gigs")
+    .insert(newGig)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateGig = async (gigId: string, updates: any) => {
+  const { data, error } = await supabase
+    .from("gigs")
+    .update(updates)
+    .eq("id", gigId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };

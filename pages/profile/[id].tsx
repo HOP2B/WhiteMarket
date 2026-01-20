@@ -9,13 +9,37 @@ const EditProfileModal: React.FC<{
   onClose: () => void;
   onSave: (updatedUser: any) => void;
 }> = ({ user, onClose, onSave }) => {
+  const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState({
     name: user?.name || "",
     bio: user?.bio || "",
     skills: user?.skills?.join(", ") || "",
-    location: "Улаанбаатар, Монгол",
+    location: user?.location || "Улаанбаатар, Монгол",
     avatar: user?.avatar || "",
+    phone: user?.phone || "",
+    website: user?.website || "",
+    linkedin: user?.linkedin || "",
+    github: user?.github || "",
+    portfolio: user?.portfolio || [],
+    experience: user?.experience || "",
+    education: user?.education || "",
+    certifications: user?.certifications || "",
   });
+  const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedAvatar(file);
+      // Simulate upload
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData({ ...formData, avatar: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,71 +50,299 @@ const EditProfileModal: React.FC<{
       skills: formData.skills.split(",").map((s: string) => s.trim()),
       location: formData.location,
       avatar: formData.avatar,
+      phone: formData.phone,
+      website: formData.website,
+      linkedin: formData.linkedin,
+      github: formData.github,
+      portfolio: formData.portfolio,
+      experience: formData.experience,
+      education: formData.education,
+      certifications: formData.certifications,
     };
     onSave(updatedUser);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 className="text-xl font-bold mb-4">Профайл засах</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Нэр</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Танилцуулга
-            </label>
-            <textarea
-              value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-              rows={3}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Ур чадвар (таслалаар тусгаарлах)
-            </label>
-            <input
-              type="text"
-              value={formData.skills}
-              onChange={(e) =>
-                setFormData({ ...formData, skills: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-              placeholder="Web Development, React, Node.js"
-            />
-          </div>
-          <div className="flex space-x-2">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Профайл засах</h2>
             <button
-              type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded"
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              Цуцлах
-            </button>
-            <button
-              type="submit"
-              className="flex-1 bg-green-600 text-white py-2 rounded"
-            >
-              Хадгалах
+              ✕
             </button>
           </div>
-        </form>
+
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab("basic")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "basic"
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Үндсэн мэдээлэл
+              </button>
+              <button
+                onClick={() => setActiveTab("professional")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "professional"
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Мэргэжлийн мэдээлэл
+              </button>
+              <button
+                onClick={() => setActiveTab("social")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "social"
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Сошиал холбоос
+              </button>
+            </nav>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information Tab */}
+            {activeTab === "basic" && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-6">
+                  <div className="relative">
+                    <img
+                      src={formData.avatar || "/default-avatar.jpg"}
+                      alt="Avatar"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+                    />
+                    <label className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 cursor-pointer hover:bg-green-700">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                      📷
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Профайл зураг
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Зургийг өөрчлөхийн тулд дээрх камерын дүрс дээр дарна уу.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Нэр *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Утасны дугаар
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="+976 99112233"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Байршил
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Танилцуулга
+                  </label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bio: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={4}
+                    placeholder="Өөрийгөө танилцуулна уу..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ур чадвар (таслалаар тусгаарлах)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.skills}
+                    onChange={(e) =>
+                      setFormData({ ...formData, skills: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Web Development, React, Node.js"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Professional Information Tab */}
+            {activeTab === "professional" && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ажлын туршлага
+                  </label>
+                  <textarea
+                    value={formData.experience}
+                    onChange={(e) =>
+                      setFormData({ ...formData, experience: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={4}
+                    placeholder="Таны ажлын туршлага, өмнөх ажил байдал зэргийг бичнэ үү..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Боловсрол
+                  </label>
+                  <textarea
+                    value={formData.education}
+                    onChange={(e) =>
+                      setFormData({ ...formData, education: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={3}
+                    placeholder="Таны боловсролын зэрэг, сургууль..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Гэрчилгээ, сертификат
+                  </label>
+                  <textarea
+                    value={formData.certifications}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        certifications: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={3}
+                    placeholder="Таны авсан гэрчилгээ, сертификатууд..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Social Links Tab */}
+            {activeTab === "social" && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Вэб сайт
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) =>
+                      setFormData({ ...formData, website: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="https://yourwebsite.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    LinkedIn
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.linkedin}
+                    onChange={(e) =>
+                      setFormData({ ...formData, linkedin: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="https://linkedin.com/in/yourprofile"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    GitHub
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.github}
+                    onChange={(e) =>
+                      setFormData({ ...formData, github: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="https://github.com/yourusername"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-6 border-t">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Цуцлах
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Хадгалах
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

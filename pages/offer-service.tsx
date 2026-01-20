@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabase";
+import { createGig } from "../api/mockApi";
 
 const OfferService: React.FC = () => {
   const { user } = useAuth();
@@ -62,20 +62,36 @@ const OfferService: React.FC = () => {
     e.preventDefault();
     if (!user) return;
 
+    // Validate that at least one package has a price
+    const hasValidPackage = Object.values(formData.packages).some(
+      (pkg) => pkg.price && parseFloat(pkg.price) > 0,
+    );
+    if (!hasValidPackage) {
+      alert("Дор хаяж нэг багцад үнэ оруулна уу!");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simulate service creation (database not set up yet)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // In production, this would insert into database
-      console.log("Creating service:", {
+      // Create the gig data structure
+      const gigData = {
         title: formData.title,
         description: formData.description,
+        price: parseFloat(formData.packages.basic.price) || 0, // Use basic package price as main price
         category: formData.category,
+        userId: user.id,
+        userName: user.username || user.name || "Unknown User",
+        userAvatar: user.imageUrl || "/default-avatar.jpg",
+        rating: 0,
+        reviews: 0,
         packages: formData.packages,
-        user_id: user.id,
-      });
+        tags: formData.tags,
+      };
 
+      // Create the gig using the mock API
+      const newGig = await createGig(gigData);
+
+      console.log("Service created successfully:", newGig);
       alert("Үйлчилгээ амжилттай үүсгэгдлээ!");
       router.push("/dashboard");
     } catch (error) {

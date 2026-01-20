@@ -1,10 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import { UserButton } from "@clerk/nextjs";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Navbar: React.FC = () => {
   const { user } = useAuth();
+  const { unreadCount, toggleNotifications } = useNotifications();
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -28,37 +31,41 @@ const Navbar: React.FC = () => {
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link
+                  href="/jobs"
+                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+                >
+                  Үйлчилгээ
+                </Link>
+                <Link
                   href="/dashboard"
                   className="text-gray-700 hover:text-green-600 transition-colors duration-200"
                 >
                   Dashboard
                 </Link>
-                {user.unsafeMetadata?.role === "worker" && (
-                  <Link
-                    href="/offer-service"
-                    className="text-gray-700 hover:text-green-600 transition-colors duration-200"
-                  >
-                    Offer Service
-                  </Link>
-                )}
                 <Link
                   href="/messages"
                   className="text-gray-700 hover:text-green-600 transition-colors duration-200"
                 >
                   Messages
                 </Link>
-                <Link
-                  href="/payment-methods"
-                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
-                >
-                  Төлбөрийн арга
-                </Link>
-                <Link
-                  href="/subscription"
-                  className="text-gray-700 hover:text-green-600 transition-colors duration-200"
-                >
-                  Төлөвлөгөө
-                </Link>
+
+                {/* Notification Bell */}
+                <div className="relative">
+                  <button
+                    onClick={toggleNotifications}
+                    className="relative p-2 text-gray-700 hover:text-green-600 transition-colors duration-200"
+                    title="Мэдэгдэл"
+                  >
+                    <span className="text-xl">🔔</span>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  <NotificationDropdown />
+                </div>
+
                 <UserButton
                   appearance={{
                     elements: {

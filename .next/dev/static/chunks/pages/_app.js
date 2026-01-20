@@ -1,6 +1,6 @@
 __turbopack_load_page_chunks__("/_app", [
-  "static/chunks/node_modules_@clerk_nextjs_dist_esm_a8aed3d1._.js",
-  "static/chunks/node_modules_next_dist_compiled_7dd1874c._.js",
+  "static/chunks/node_modules_@clerk_nextjs_dist_esm_e9d45379._.js",
+  "static/chunks/node_modules_next_dist_compiled_c94a645a._.js",
   "static/chunks/node_modules_next_dist_shared_lib_9c91274f._.js",
   "static/chunks/node_modules_next_dist_client_099c73fe._.js",
   "static/chunks/node_modules_next_dist_server_de49ac7b._.js",
@@ -11,9 +11,10 @@ __turbopack_load_page_chunks__("/_app", [
   "static/chunks/node_modules_swr_dist_85285875._.js",
   "static/chunks/node_modules_@clerk_clerk-react_dist_66c13766._.js",
   "static/chunks/node_modules_@clerk_backend_dist_fba3e588._.js",
-  "static/chunks/node_modules_93eeef90._.js",
-  "static/chunks/[root-of-the-server]__df210280._.js",
+  "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
+  "static/chunks/node_modules_90f9a815._.js",
+  "static/chunks/[root-of-the-server]__4b0d4e5a._.js",
   "static/chunks/styles_globals_dc36e6c9.css",
   "static/chunks/pages__app_2da965e7._.js",
-  "static/chunks/turbopack-pages__app_050faa74._.js"
+  "static/chunks/turbopack-pages__app_32d276d5._.js"
 ])

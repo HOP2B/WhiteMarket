@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getGigs, getOrders } from "../api/mockApi";
+import { getGigs, getOrders, createGig } from "../api/mockApi";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -19,26 +19,41 @@ const Dashboard: React.FC = () => {
   });
   const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+  const fetchData = async () => {
+    if (!user) return;
 
-      try {
-        const [gigsData, ordersData] = await Promise.all([
-          getGigs(),
-          getOrders(user.id),
-        ]);
-        setGigs(gigsData);
-        setOrders(ordersData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
+    try {
+      const [gigsData, ordersData] = await Promise.all([
+        getGigs(),
+        getOrders(user.id),
+      ]);
+      setGigs(gigsData);
+      setOrders(ordersData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [user]);
+
+  // Refresh data when returning to dashboard (e.g., after creating a service)
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (user) {
+        fetchData();
       }
     };
 
-    fetchData();
-  }, [user]);
+    router.events.on("routeChangeComplete", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [user, router.events]);
 
   if (loading) {
     return (
@@ -71,20 +86,18 @@ const Dashboard: React.FC = () => {
       !quickCreateData.description ||
       !quickCreateData.price
     ) {
-      alert("Please fill in all fields");
+      alert("Бүх талбарыг бөглөнө үү");
       return;
     }
 
     setCreating(true);
     try {
-      // Simulate API call to MySQL database
-      const newGig = {
-        id: Date.now().toString(),
+      // Create the gig using the mock API
+      const gigData = {
         title: quickCreateData.title,
         description: quickCreateData.description,
         price: parseFloat(quickCreateData.price),
         category: "General",
-        user_id: user.id,
         userId: user.id,
         userName: user.name || "Unknown User",
         userAvatar: user.imageUrl || "/default-avatar.jpg",
@@ -92,14 +105,11 @@ const Dashboard: React.FC = () => {
         reviews: 0,
       };
 
-      // Simulate POST request to MySQL database
-      console.log("Sending POST request to MySQL database:", newGig);
+      const newGig = await createGig(gigData);
+      console.log("Service created successfully:", newGig);
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update local state (in real app, this would be handled by real-time updates)
-      const updatedGigs = [newGig, ...gigs];
+      // Refresh the gigs data
+      const updatedGigs = await getGigs();
       setGigs(updatedGigs);
 
       // Reset form and close modal
@@ -253,6 +263,16 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setShowQuickCreate(true)}
+                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 shadow-lg"
+                  >
+                    <span>+</span>
+                    <span>Quick Create Service</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -433,6 +453,99 @@ const Dashboard: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Quick Create Modal */}
+        {showQuickCreate && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Quick Create Service
+                </h3>
+                <button
+                  onClick={() => setShowQuickCreate(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service Title
+                  </label>
+                  <input
+                    type="text"
+                    value={quickCreateData.title}
+                    onChange={(e) =>
+                      setQuickCreateData({
+                        ...quickCreateData,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="e.g., Web Development"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={quickCreateData.description}
+                    onChange={(e) =>
+                      setQuickCreateData({
+                        ...quickCreateData,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={3}
+                    placeholder="Brief description of your service"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (₮)
+                  </label>
+                  <input
+                    type="number"
+                    value={quickCreateData.price}
+                    onChange={(e) =>
+                      setQuickCreateData({
+                        ...quickCreateData,
+                        price: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="50000"
+                    min="0"
+                    step="1000"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowQuickCreate(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleQuickCreate}
+                  disabled={creating}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creating ? "Creating..." : "Create Service"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
