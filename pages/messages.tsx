@@ -2,7 +2,14 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getMessages, sendMessage, getUserById } from "../api/mockApi";
+import { useNotifications } from "../context/NotificationContext";
+import {
+  getMessages,
+  sendMessage,
+  getUserById,
+  searchUsers,
+  markMessagesAsRead,
+} from "../api/mockApi";
 import { supabase } from "../lib/supabase";
 
 interface Message {
@@ -30,6 +37,7 @@ interface UserStatus {
 
 const Messages: React.FC = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const router = useRouter();
   const { contact } = router.query;
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,6 +50,9 @@ const Messages: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [userStatuses, setUserStatuses] = useState<UserStatus>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<any[]>([]);
+  const [showUserSearch, setShowUserSearch] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -91,12 +102,35 @@ const Messages: React.FC = () => {
             table: "messages",
           },
           (payload) => {
-            const newMessage = payload.new as Message;
+            const dbMessage = payload.new;
+            const newMessage: Message = {
+              id: dbMessage.id,
+              senderId: dbMessage.sender_id,
+              receiverId: dbMessage.receiver_id,
+              content: dbMessage.content,
+              timestamp: dbMessage.timestamp,
+              status: dbMessage.status || "sent",
+              file: dbMessage.file,
+            };
             if (
               newMessage.senderId === user.id ||
               newMessage.receiverId === user.id
             ) {
               setMessages((prev) => [...prev, newMessage]);
+
+              // Add notification if not currently viewing this conversation
+              if (
+                newMessage.senderId !== user.id &&
+                selectedConversation !== newMessage.senderId
+              ) {
+                const sender = conversationUsers[newMessage.senderId];
+                addNotification({
+                  type: "message",
+                  title: `New message from ${sender?.name || "Unknown"}`,
+                  message: newMessage.content || "Sent a file",
+                  actionUrl: `/messages?contact=${newMessage.senderId}`,
+                });
+              }
             }
           },
         )
@@ -113,6 +147,27 @@ const Messages: React.FC = () => {
       setSelectedConversation(contact);
     }
   }, [contact]);
+
+  useEffect(() => {
+    if (selectedConversation && user) {
+      const unreadMessages = messages.filter(
+        (msg) =>
+          msg.receiverId === user.id &&
+          msg.senderId === selectedConversation &&
+          msg.status !== "read",
+      );
+      if (unreadMessages.length > 0) {
+        const messageIds = unreadMessages.map((msg) => msg.id);
+        markMessagesAsRead(messageIds).catch(console.error);
+        // Update local state
+        setMessages((prev) =>
+          prev.map((msg) =>
+            messageIds.includes(msg.id) ? { ...msg, status: "read" } : msg,
+          ),
+        );
+      }
+    }
+  }, [selectedConversation, messages, user]);
 
   const handleSendMessage = async () => {
     if ((!newMessage.trim() && !selectedFile) || !user || !selectedConversation)
@@ -138,8 +193,8 @@ const Messages: React.FC = () => {
         };
       }
 
-      await sendMessage(message);
-      setMessages([...messages, message]);
+      const sentMessage = await sendMessage(message);
+      setMessages([...messages, sentMessage]);
       setNewMessage("");
       setSelectedFile(null);
 
@@ -212,9 +267,23 @@ const Messages: React.FC = () => {
     ).length;
   };
 
+  const handleUserSearch = async (query: string) => {
+    if (query.trim().length < 2) {
+      setUserSearchResults([]);
+      return;
+    }
+    try {
+      const results = await searchUsers(query);
+      setUserSearchResults(results.filter((u) => u.id !== user?.id));
+    } catch (error) {
+      console.error("Error searching users:", error);
+      setUserSearchResults([]);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-green-50 to-white">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
       </div>
     );
@@ -222,10 +291,10 @@ const Messages: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-green-800 animate-fade-in">
             Please login to view messages
           </h1>
         </div>
@@ -234,107 +303,182 @@ const Messages: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Messages</h1>
+        <h1 className="text-3xl font-bold text-blue-800 mb-8 animate-fade-in">
+          Messages
+        </h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-1/4 bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-4 border-b">
-              <h2 className="text-xl font-bold text-gray-900">Conversations</h2>
-              <input
-                type="text"
-                placeholder="Хайх..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
+          <div className="lg:w-1/4 bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden animate-slide-in-left">
+            <div className="p-4 border-b border-blue-200 bg-blue-50">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-xl font-bold text-blue-800">
+                  {showUserSearch ? "Search Users" : "Conversations"}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowUserSearch(!showUserSearch);
+                    setUserSearchQuery("");
+                    setUserSearchResults([]);
+                  }}
+                  className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors duration-200 hover:scale-105"
+                >
+                  {showUserSearch ? "Back to Conversations" : "Search Users"}
+                </button>
+              </div>
+              {showUserSearch ? (
+                <input
+                  type="text"
+                  placeholder="Search users by name..."
+                  value={userSearchQuery}
+                  onChange={(e) => {
+                    setUserSearchQuery(e.target.value);
+                    handleUserSearch(e.target.value);
+                  }}
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                />
+              ) : (
+                <input
+                  type="text"
+                  placeholder="Хайх..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                />
+              )}
             </div>
             <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-              {filteredConversations.map((conversationId) => {
-                const conversationMessages = messages.filter(
-                  (msg) =>
-                    (msg.senderId === user?.id &&
-                      msg.receiverId === conversationId) ||
-                    (msg.senderId === conversationId &&
-                      msg.receiverId === user?.id),
-                );
-                const lastMessage =
-                  conversationMessages[conversationMessages.length - 1];
-                const otherUser = conversationUsers[conversationId];
-                const unreadCount = getUnreadCount(conversationId);
-                const userStatus = userStatuses[conversationId];
-
-                return (
-                  <div
-                    key={conversationId}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                      selectedConversation === conversationId
-                        ? "bg-gray-100"
-                        : ""
-                    }`}
-                    onClick={() => setSelectedConversation(conversationId)}
-                  >
-                    <div className="flex items-center">
-                      <div className="relative">
+              {showUserSearch
+                ? userSearchResults.map((userResult) => (
+                    <div
+                      key={userResult.id}
+                      className="p-4 cursor-pointer hover:bg-blue-50 transition-all duration-200 hover:shadow-sm animate-fade-in"
+                      onClick={() => {
+                        setSelectedConversation(userResult.id);
+                        setShowUserSearch(false);
+                        setUserSearchQuery("");
+                        setUserSearchResults([]);
+                        // Add user to conversationUsers if not already there
+                        setConversationUsers((prev) => ({
+                          ...prev,
+                          [userResult.id]: userResult,
+                        }));
+                      }}
+                    >
+                      <div className="flex items-center">
                         <img
-                          src={otherUser?.avatar || "/default-avatar.jpg"}
-                          alt={otherUser?.name || "User"}
+                          src={userResult.avatar || "/default-avatar.jpg"}
+                          alt={userResult.name}
                           className="w-10 h-10 rounded-full mr-3"
                         />
-                        {userStatus?.isOnline && (
-                          <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
+                        <div className="flex-1">
                           <p className="font-semibold text-gray-900">
-                            {otherUser?.name || `User ${conversationId}`}
+                            {userResult.name}
                           </p>
-                          {lastMessage && (
-                            <p className="text-xs text-gray-500">
-                              {new Date(
-                                lastMessage.timestamp,
-                              ).toLocaleDateString()}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-gray-500 truncate flex-1">
-                            {lastMessage?.content || "No messages yet"}
+                          <p className="text-sm text-gray-500">
+                            {userResult.bio || "No bio available"}
                           </p>
-                          {unreadCount > 0 && (
-                            <span className="bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-2">
-                              {unreadCount}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  ))
+                : filteredConversations.map((conversationId) => {
+                    const conversationMessages = messages.filter(
+                      (msg) =>
+                        (msg.senderId === user?.id &&
+                          msg.receiverId === conversationId) ||
+                        (msg.senderId === conversationId &&
+                          msg.receiverId === user?.id),
+                    );
+                    const lastMessage =
+                      conversationMessages[conversationMessages.length - 1];
+                    const otherUser = conversationUsers[conversationId];
+                    const unreadCount = getUnreadCount(conversationId);
+                    const userStatus = userStatuses[conversationId];
+
+                    return (
+                      <div
+                        key={conversationId}
+                        className={`p-4 cursor-pointer hover:bg-green-50 transition-all duration-200 hover:shadow-md ${
+                          selectedConversation === conversationId
+                            ? "bg-green-100 border-l-4 border-green-500"
+                            : ""
+                        }`}
+                        onClick={() => setSelectedConversation(conversationId)}
+                      >
+                        <div className="flex items-center">
+                          <div className="relative">
+                            <img
+                              src={otherUser?.avatar || "/default-avatar.jpg"}
+                              alt={otherUser?.name || "User"}
+                              className="w-10 h-10 rounded-full mr-3"
+                            />
+                            {userStatus?.isOnline && (
+                              <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <p className="font-semibold text-gray-900">
+                                {otherUser?.name || `User ${conversationId}`}
+                              </p>
+                              {lastMessage && (
+                                <p className="text-xs text-gray-500">
+                                  {new Date(
+                                    lastMessage.timestamp,
+                                  ).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <p className="text-sm text-gray-500 truncate flex-1">
+                                {lastMessage?.content || "No messages yet"}
+                              </p>
+                              {unreadCount > 0 && (
+                                <span className="bg-green-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center ml-2 animate-pulse shadow-lg">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
 
-          <div className="lg:w-3/4 bg-white rounded-lg shadow-md">
-            <div className="p-4 border-b">
-              <h2 className="text-xl font-bold text-gray-900">Conversation</h2>
+          <div className="lg:w-3/4 bg-white rounded-xl shadow-lg border border-blue-100 animate-slide-in-right">
+            <div className="p-4 border-b border-blue-200 bg-blue-50">
+              <h2 className="text-xl font-bold text-blue-800">Conversation</h2>
             </div>
 
             <div className="p-4 h-96 overflow-y-auto">
               {selectedConversation ? (
                 <>
-                  {messages
-                    .filter(
+                  {(() => {
+                    const conversationMessages = messages.filter(
                       (msg) =>
                         (msg.senderId === user.id &&
                           msg.receiverId === selectedConversation) ||
                         (msg.senderId === selectedConversation &&
                           msg.receiverId === user.id),
-                    )
-                    .map((message) => (
+                    );
+                    const lastReadMessage = conversationMessages
+                      .filter(
+                        (msg) =>
+                          msg.senderId === user.id && msg.status === "read",
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(b.timestamp).getTime() -
+                          new Date(a.timestamp).getTime(),
+                      )[0];
+                    const otherUser = conversationUsers[selectedConversation];
+
+                    return conversationMessages.map((message) => (
                       <div
                         key={message.id}
                         className={`mb-4 flex ${
@@ -344,10 +488,10 @@ const Messages: React.FC = () => {
                         }`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md rounded-lg p-3 ${
+                          className={`max-w-xs lg:max-w-md rounded-2xl p-4 shadow-sm transition-all duration-300 animate-fade-in ${
                             message.senderId === user.id
-                              ? "bg-green-600 text-white"
-                              : "bg-gray-200 text-gray-900"
+                              ? "bg-blue-500 text-white ml-auto"
+                              : "bg-white text-gray-900 border border-blue-200"
                           }`}
                         >
                           {message.file && (
@@ -382,40 +526,53 @@ const Messages: React.FC = () => {
                             <p
                               className={`text-xs ${
                                 message.senderId === user.id
-                                  ? "text-green-100"
+                                  ? "text-blue-100"
                                   : "text-gray-500"
                               }`}
                             >
                               {new Date(message.timestamp).toLocaleTimeString()}
                             </p>
-                            {message.senderId === user.id && (
-                              <span className="text-xs text-green-100">
-                                {message.status === "sent" && "✓"}
-                                {message.status === "delivered" && "✓✓"}
-                                {message.status === "read" && "✓✓"}
-                              </span>
-                            )}
+                            <div className="flex items-center">
+                              {message.senderId === user.id &&
+                                lastReadMessage?.id === message.id && (
+                                  <img
+                                    src={
+                                      otherUser?.avatar || "/default-avatar.jpg"
+                                    }
+                                    alt="Read by"
+                                    className="w-4 h-4 rounded-full mr-1"
+                                  />
+                                )}
+                              {message.senderId === user.id && (
+                                <span className="text-xs text-blue-100">
+                                  {message.status === "sent" && "✓"}
+                                  {message.status === "delivered" && "✓✓"}
+                                  {message.status === "read" && "✓✓"}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ));
+                  })()}
                   {/* Typing Indicator */}
                   {userStatuses[selectedConversation]?.isTyping && (
-                    <div className="mb-4 flex justify-start">
-                      <div className="bg-gray-200 text-gray-900 rounded-lg p-3">
-                        <div className="flex items-center space-x-1">
+                    <div className="mb-4 flex justify-start animate-fade-in">
+                      <div className="bg-white text-gray-900 rounded-2xl p-4 border border-green-200 shadow-sm">
+                        <div className="flex items-center space-x-2">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
                             <div
-                              className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                              className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
                               style={{ animationDelay: "0.1s" }}
                             ></div>
                             <div
-                              className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                              className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
                               style={{ animationDelay: "0.2s" }}
                             ></div>
                           </div>
-                          <span className="text-xs text-gray-500 ml-2">
+                          <span className="text-xs text-green-600 ml-2">
                             Бичиж байна...
                           </span>
                         </div>
@@ -425,8 +582,8 @@ const Messages: React.FC = () => {
                   <div ref={messagesEndRef} />
                 </>
               ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-500">
+                <div className="flex items-center justify-center h-full animate-fade-in">
+                  <p className="text-green-600 text-lg">
                     Харилцагчийг сонгоод зурвас бичих боломжтой
                   </p>
                 </div>
@@ -434,25 +591,27 @@ const Messages: React.FC = () => {
             </div>
 
             {selectedConversation && (
-              <div className="p-4 border-t">
+              <div className="p-4 border-t border-blue-200 bg-blue-50">
                 {selectedFile && (
-                  <div className="mb-2 p-2 bg-gray-100 rounded flex items-center justify-between">
+                  <div className="mb-2 p-3 bg-white rounded-lg border border-blue-200 flex items-center justify-between shadow-sm animate-slide-in-up">
                     <div className="flex items-center">
-                      <span className="text-sm mr-2">📎</span>
-                      <span className="text-sm">{selectedFile.name}</span>
+                      <span className="text-blue-600 mr-2">📎</span>
+                      <span className="text-sm text-gray-700">
+                        {selectedFile.name}
+                      </span>
                     </div>
                     <button
                       onClick={() => setSelectedFile(null)}
-                      className="text-red-500 hover:text-red-700 text-sm"
+                      className="text-red-500 hover:text-red-700 text-sm transition-colors duration-200 hover:scale-110"
                     >
                       ✕
                     </button>
                   </div>
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300"
+                    className="bg-white text-blue-600 px-4 py-3 rounded-xl hover:bg-blue-50 transition-all duration-200 hover:scale-105 shadow-sm border border-blue-200"
                   >
                     😀
                   </button>
@@ -464,10 +623,10 @@ const Messages: React.FC = () => {
                       handleTyping();
                     }}
                     placeholder="Зурвас бичнэ үү..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="flex-1 px-4 py-3 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   />
-                  <label className="cursor-pointer bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 flex items-center">
+                  <label className="cursor-pointer bg-white text-green-600 px-4 py-3 rounded-xl hover:bg-green-50 transition-all duration-200 hover:scale-105 shadow-sm border border-green-200 flex items-center">
                     <span className="mr-1">📎</span>
                     <input
                       type="file"
@@ -479,7 +638,7 @@ const Messages: React.FC = () => {
                   <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim() && !selectedFile}
-                    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-lg disabled:shadow-none"
                   >
                     Илгээх
                   </button>
@@ -487,8 +646,8 @@ const Messages: React.FC = () => {
 
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
-                  <div className="absolute bottom-16 left-4 bg-white border border-gray-300 rounded-lg p-3 shadow-lg">
-                    <div className="grid grid-cols-8 gap-2">
+                  <div className="absolute bottom-20 left-4 bg-white border border-green-300 rounded-xl p-4 shadow-xl animate-slide-in-up">
+                    <div className="grid grid-cols-8 gap-3">
                       {["😀", "😂", "❤️", "👍", "👎", "🔥", "💯", "🙏"].map(
                         (emoji) => (
                           <button
@@ -497,7 +656,7 @@ const Messages: React.FC = () => {
                               setNewMessage((prev) => prev + emoji);
                               setShowEmojiPicker(false);
                             }}
-                            className="text-2xl hover:bg-gray-100 rounded p-1"
+                            className="text-2xl hover:bg-green-50 rounded-lg p-2 transition-all duration-200 hover:scale-110"
                           >
                             {emoji}
                           </button>

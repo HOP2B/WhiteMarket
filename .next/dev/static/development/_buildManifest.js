@@ -2,6 +2,9 @@ self.__BUILD_MANIFEST = {
   "/": [
     "static/chunks/pages/index.js"
   ],
+  "/messages": [
+    "static/chunks/pages/messages.js"
+  ],
   "__rewrites": {
     "afterFiles": [],
     "beforeFiles": [],

@@ -290,6 +290,8 @@ __turbopack_context__.s([
     ()=>addToFavorites,
     "createGig",
     ()=>createGig,
+    "createNotification",
+    ()=>createNotification,
     "createOrder",
     ()=>createOrder,
     "createReview",
@@ -314,12 +316,16 @@ __turbopack_context__.s([
     ()=>getUserById,
     "getUserStats",
     ()=>getUserStats,
+    "markMessagesAsRead",
+    ()=>markMessagesAsRead,
     "markNotificationAsRead",
     ()=>markNotificationAsRead,
     "removeFromFavorites",
     ()=>removeFromFavorites,
     "searchGigs",
     ()=>searchGigs,
+    "searchUsers",
+    ()=>searchUsers,
     "sendMessage",
     ()=>sendMessage,
     "updateGig",
@@ -395,12 +401,51 @@ const getMessages = async (userId)=>{
         ascending: true
     });
     if (error) throw error;
-    return data;
+    return data.map((msg)=>({
+            id: msg.id,
+            senderId: msg.sender_id,
+            receiverId: msg.receiver_id,
+            content: msg.content,
+            timestamp: msg.timestamp,
+            status: msg.status || "sent",
+            file: msg.file,
+            sender: msg.sender,
+            receiver: msg.receiver
+        }));
 };
 const sendMessage = async (message)=>{
-    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(message).select().single();
+    const dbMessage = {
+        id: message.id,
+        sender_id: message.senderId,
+        receiver_id: message.receiverId,
+        content: message.content,
+        timestamp: message.timestamp,
+        ...message.file && {
+            file: message.file
+        }
+    };
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(dbMessage).select().single();
+    if (error) throw error;
+    return {
+        id: data.id,
+        senderId: data.sender_id,
+        receiverId: data.receiver_id,
+        content: data.content,
+        timestamp: data.timestamp,
+        status: data.status || "sent",
+        file: data.file
+    };
+};
+const searchUsers = async (query)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("users").select("*").ilike("name", `%${query}%`).limit(20);
     if (error) throw error;
     return data;
+};
+const markMessagesAsRead = async (messageIds)=>{
+    const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("messages").update({
+        status: "read"
+    }).in("id", messageIds);
+    if (error) throw error;
 };
 const createOrder = async (order)=>{
     // Simulate order creation (database not set up yet)
@@ -470,6 +515,17 @@ const createReview = async (review)=>{
         date: new Date().toISOString().split("T")[0]
     };
     const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("reviews").insert(newReview).select().single();
+    if (error) throw error;
+    return data;
+};
+const createNotification = async (notification)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("notifications").insert({
+        user_id: notification.userId,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        action_url: notification.actionUrl
+    }).select().single();
     if (error) throw error;
     return data;
 };
@@ -706,19 +762,32 @@ const NotificationProvider = ({ children })=>{
             setIsLoading(false);
         }
     };
-    const addNotification = (notificationData)=>{
-        const newNotification = {
-            ...notificationData,
-            id: Date.now().toString(),
-            read: false,
-            createdAt: new Date().toISOString()
-        };
-        setNotifications((prev)=>[
-                newNotification,
-                ...prev
-            ]);
-        // In a real app, you would also save this to the database
-        console.log("New notification added:", newNotification);
+    const addNotification = async (notificationData)=>{
+        try {
+            const dbNotification = {
+                userId: user?.id,
+                type: notificationData.type,
+                title: notificationData.title,
+                message: notificationData.message,
+                actionUrl: notificationData.actionUrl
+            };
+            const saved = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$api$2f$mockApi$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["createNotification"])(dbNotification);
+            const newNotification = {
+                id: saved.id,
+                type: saved.type,
+                title: saved.title,
+                message: saved.message,
+                read: false,
+                createdAt: saved.created_at,
+                actionUrl: saved.action_url
+            };
+            setNotifications((prev)=>[
+                    newNotification,
+                    ...prev
+                ]);
+        } catch (error) {
+            console.error("Error adding notification:", error);
+        }
     };
     const markAsRead = async (notificationId)=>{
         try {
@@ -777,7 +846,7 @@ const NotificationProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/context/NotificationContext.tsx",
-        lineNumber: 136,
+        lineNumber: 154,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };

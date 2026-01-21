@@ -701,6 +701,8 @@ __turbopack_context__.s([
     ()=>addToFavorites,
     "createGig",
     ()=>createGig,
+    "createNotification",
+    ()=>createNotification,
     "createOrder",
     ()=>createOrder,
     "createReview",
@@ -725,12 +727,16 @@ __turbopack_context__.s([
     ()=>getUserById,
     "getUserStats",
     ()=>getUserStats,
+    "markMessagesAsRead",
+    ()=>markMessagesAsRead,
     "markNotificationAsRead",
     ()=>markNotificationAsRead,
     "removeFromFavorites",
     ()=>removeFromFavorites,
     "searchGigs",
     ()=>searchGigs,
+    "searchUsers",
+    ()=>searchUsers,
     "sendMessage",
     ()=>sendMessage,
     "updateGig",
@@ -802,12 +808,51 @@ const getMessages = async (userId)=>{
         ascending: true
     });
     if (error) throw error;
-    return data;
+    return data.map((msg)=>({
+            id: msg.id,
+            senderId: msg.sender_id,
+            receiverId: msg.receiver_id,
+            content: msg.content,
+            timestamp: msg.timestamp,
+            status: msg.status || "sent",
+            file: msg.file,
+            sender: msg.sender,
+            receiver: msg.receiver
+        }));
 };
 const sendMessage = async (message)=>{
-    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(message).select().single();
+    const dbMessage = {
+        id: message.id,
+        sender_id: message.senderId,
+        receiver_id: message.receiverId,
+        content: message.content,
+        timestamp: message.timestamp,
+        ...message.file && {
+            file: message.file
+        }
+    };
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("messages").insert(dbMessage).select().single();
+    if (error) throw error;
+    return {
+        id: data.id,
+        senderId: data.sender_id,
+        receiverId: data.receiver_id,
+        content: data.content,
+        timestamp: data.timestamp,
+        status: data.status || "sent",
+        file: data.file
+    };
+};
+const searchUsers = async (query)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("users").select("*").ilike("name", `%${query}%`).limit(20);
     if (error) throw error;
     return data;
+};
+const markMessagesAsRead = async (messageIds)=>{
+    const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("messages").update({
+        status: "read"
+    }).in("id", messageIds);
+    if (error) throw error;
 };
 const createOrder = async (order)=>{
     // Simulate order creation (database not set up yet)
@@ -877,6 +922,17 @@ const createReview = async (review)=>{
         date: new Date().toISOString().split("T")[0]
     };
     const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("reviews").insert(newReview).select().single();
+    if (error) throw error;
+    return data;
+};
+const createNotification = async (notification)=>{
+    const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["supabase"].from("notifications").insert({
+        user_id: notification.userId,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        action_url: notification.actionUrl
+    }).select().single();
     if (error) throw error;
     return data;
 };
@@ -1112,19 +1168,32 @@ const NotificationProvider = ({ children })=>{
             setIsLoading(false);
         }
     };
-    const addNotification = (notificationData)=>{
-        const newNotification = {
-            ...notificationData,
-            id: Date.now().toString(),
-            read: false,
-            createdAt: new Date().toISOString()
-        };
-        setNotifications((prev)=>[
-                newNotification,
-                ...prev
-            ]);
-        // In a real app, you would also save this to the database
-        console.log("New notification added:", newNotification);
+    const addNotification = async (notificationData)=>{
+        try {
+            const dbNotification = {
+                userId: user?.id,
+                type: notificationData.type,
+                title: notificationData.title,
+                message: notificationData.message,
+                actionUrl: notificationData.actionUrl
+            };
+            const saved = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$api$2f$mockApi$2e$ts__$5b$client$5d$__$28$ecmascript$29$__["createNotification"])(dbNotification);
+            const newNotification = {
+                id: saved.id,
+                type: saved.type,
+                title: saved.title,
+                message: saved.message,
+                read: false,
+                createdAt: saved.created_at,
+                actionUrl: saved.action_url
+            };
+            setNotifications((prev)=>[
+                    newNotification,
+                    ...prev
+                ]);
+        } catch (error) {
+            console.error("Error adding notification:", error);
+        }
     };
     const markAsRead = async (notificationId)=>{
         try {
@@ -1183,7 +1252,7 @@ const NotificationProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/context/NotificationContext.tsx",
-        lineNumber: 136,
+        lineNumber: 154,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -1706,7 +1775,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link
 ;
 const GigCard = ({ gig })=>{
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300",
+        className: "bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border border-green-200",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "p-6",
             children: [
@@ -1716,7 +1785,7 @@ const GigCard = ({ gig })=>{
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
                             src: gig.userAvatar,
                             alt: gig.userName,
-                            className: "w-12 h-12 rounded-full mr-4"
+                            className: "w-12 h-12 rounded-full mr-4 border-2 border-green-200"
                         }, void 0, false, {
                             fileName: "[project]/components/GigCard.tsx",
                             lineNumber: 23,
@@ -1725,7 +1794,7 @@ const GigCard = ({ gig })=>{
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                    className: "text-lg font-semibold text-gray-900",
+                                    className: "text-lg font-semibold text-green-800",
                                     children: gig.title
                                 }, void 0, false, {
                                     fileName: "[project]/components/GigCard.tsx",
@@ -1733,14 +1802,14 @@ const GigCard = ({ gig })=>{
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-sm text-gray-600",
+                                    className: "text-sm text-green-600",
                                     children: [
                                         "by ",
                                         gig.userName
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/GigCard.tsx",
-                                    lineNumber: 30,
+                                    lineNumber: 32,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
@@ -1760,7 +1829,7 @@ const GigCard = ({ gig })=>{
                     children: gig.description
                 }, void 0, false, {
                     fileName: "[project]/components/GigCard.tsx",
-                    lineNumber: 33,
+                    lineNumber: 35,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1776,12 +1845,12 @@ const GigCard = ({ gig })=>{
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/GigCard.tsx",
-                                lineNumber: 36,
+                                lineNumber: 38,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         }, void 0, false, {
                             fileName: "[project]/components/GigCard.tsx",
-                            lineNumber: 35,
+                            lineNumber: 37,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1792,7 +1861,7 @@ const GigCard = ({ gig })=>{
                                     children: "★"
                                 }, void 0, false, {
                                     fileName: "[project]/components/GigCard.tsx",
-                                    lineNumber: 41,
+                                    lineNumber: 43,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1800,7 +1869,7 @@ const GigCard = ({ gig })=>{
                                     children: gig.rating
                                 }, void 0, false, {
                                     fileName: "[project]/components/GigCard.tsx",
-                                    lineNumber: 42,
+                                    lineNumber: 44,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1812,35 +1881,35 @@ const GigCard = ({ gig })=>{
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/GigCard.tsx",
-                                    lineNumber: 43,
+                                    lineNumber: 45,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/GigCard.tsx",
-                            lineNumber: 40,
+                            lineNumber: 42,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/GigCard.tsx",
-                    lineNumber: 34,
+                    lineNumber: 36,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "mt-4",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                         href: `/gigs/${gig.id}`,
-                        className: "w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 text-center block",
+                        className: "w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 text-center block transition-all duration-200 hover:scale-105 shadow-md",
                         children: "View Details"
                     }, void 0, false, {
                         fileName: "[project]/components/GigCard.tsx",
-                        lineNumber: 47,
+                        lineNumber: 49,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 }, void 0, false, {
                     fileName: "[project]/components/GigCard.tsx",
-                    lineNumber: 46,
+                    lineNumber: 48,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0))
             ]
@@ -1931,7 +2000,7 @@ const Home = ()=>{
     ]);
     if (!user) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-            className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col",
+            className: "min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex flex-col",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$Navbar$2e$tsx__$5b$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                     fileName: "[project]/pages/index.tsx",
@@ -1941,13 +2010,13 @@ const Home = ()=>{
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "max-w-md w-full text-center",
+                        className: "max-w-md w-full text-center animate-fade-in",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mb-8",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                        className: "text-4xl font-bold text-gray-900 mb-4",
+                                        className: "text-4xl font-bold text-green-800 mb-4",
                                         children: "Welcome to WhiteMarket"
                                     }, void 0, false, {
                                         fileName: "[project]/pages/index.tsx",
@@ -1955,7 +2024,7 @@ const Home = ()=>{
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-lg text-gray-600",
+                                        className: "text-lg text-green-600",
                                         children: "Connect with talented freelancers or find the perfect job for your skills."
                                     }, void 0, false, {
                                         fileName: "[project]/pages/index.tsx",
@@ -1975,7 +2044,7 @@ const Home = ()=>{
                                         href: "/login",
                                         className: "block",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:scale-105",
+                                            className: "w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transform transition-all duration-200 hover:scale-105",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                     className: "mr-2",
@@ -1998,13 +2067,13 @@ const Home = ()=>{
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-sm text-gray-500",
+                                        className: "text-sm text-green-500",
                                         children: [
                                             "Join as a",
                                             " ",
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                                 href: "/register",
-                                                className: "text-blue-600 hover:text-blue-500 font-medium",
+                                                className: "text-green-600 hover:text-green-700 font-medium transition-colors duration-200",
                                                 children: "Worker"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
@@ -2016,7 +2085,7 @@ const Home = ()=>{
                                             " ",
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                                 href: "/register",
-                                                className: "text-green-600 hover:text-green-500 font-medium",
+                                                className: "text-green-600 hover:text-green-700 font-medium transition-colors duration-200",
                                                 children: "Employer"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
@@ -2057,7 +2126,7 @@ const Home = ()=>{
     const isWorker = userRole === "worker";
     const isEmployer = userRole === "employer";
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col",
+        className: "min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex flex-col",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$Navbar$2e$tsx__$5b$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/pages/index.tsx",
@@ -2070,10 +2139,10 @@ const Home = ()=>{
                     className: "max-w-4xl w-full",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "text-center mb-12",
+                            className: "text-center mb-12 animate-fade-in",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: `inline-flex items-center justify-center w-16 h-16 ${isWorker ? "bg-blue-100" : "bg-green-100"} rounded-full mb-4`,
+                                    className: `inline-flex items-center justify-center w-16 h-16 ${isWorker ? "bg-green-100" : "bg-green-200"} rounded-full mb-4 animate-bounce`,
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "text-2xl",
                                         role: "img",
@@ -2090,7 +2159,7 @@ const Home = ()=>{
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                    className: "text-4xl font-bold text-gray-900 mb-4",
+                                    className: "text-4xl font-bold text-green-800 mb-4",
                                     children: isWorker ? "Find Your Next Opportunity" : "Manage Your Projects"
                                 }, void 0, false, {
                                     fileName: "[project]/pages/index.tsx",
@@ -2098,8 +2167,8 @@ const Home = ()=>{
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-lg text-gray-600",
-                                    children: isWorker ? "Discover exciting projects and showcase your skills" : "Oversee your posted jobs and connect with talented professionals"
+                                    className: "text-lg text-green-600",
+                                    children: isWorker ? "Discover exciting projects and showcase your skills" : "Oversee recently posted jobs and connect with talented professionals"
                                 }, void 0, false, {
                                     fileName: "[project]/pages/index.tsx",
                                     lineNumber: 119,
@@ -2112,21 +2181,21 @@ const Home = ()=>{
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "bg-white rounded-xl shadow-xl border border-gray-100 p-8",
+                            className: "bg-white rounded-xl shadow-xl border border-green-200 p-8 animate-slide-in-up",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "mb-6",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                            className: "text-2xl font-semibold text-gray-900 mb-2",
-                                            children: isWorker ? "Available Projects" : "Your Posted Jobs"
+                                            className: "text-2xl font-semibold text-green-800 mb-2",
+                                            children: isWorker ? "Available Projects" : "Recently Posted Jobs"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
                                             lineNumber: 128,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-gray-600",
+                                            className: "text-green-600",
                                             children: isWorker ? "Browse and apply for projects that match your expertise" : "Track applications and manage your job postings"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
@@ -2142,7 +2211,7 @@ const Home = ()=>{
                                 loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "flex justify-center items-center h-64",
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"
+                                        className: "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"
                                     }, void 0, false, {
                                         fileName: "[project]/pages/index.tsx",
                                         lineNumber: 140,
@@ -2154,8 +2223,18 @@ const Home = ()=>{
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0)) : gigs.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
-                                    children: gigs.map((gig)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$GigCard$2e$tsx__$5b$client$5d$__$28$ecmascript$29$__["default"], {
-                                            gig: gig
+                                    children: gigs.map((gig, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "animate-fade-in",
+                                            style: {
+                                                animationDelay: `${index * 0.1}s`
+                                            },
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$GigCard$2e$tsx__$5b$client$5d$__$28$ecmascript$29$__["default"], {
+                                                gig: gig
+                                            }, void 0, false, {
+                                                fileName: "[project]/pages/index.tsx",
+                                                lineNumber: 150,
+                                                columnNumber: 21
+                                            }, ("TURBOPACK compile-time value", void 0))
                                         }, gig.id, false, {
                                             fileName: "[project]/pages/index.tsx",
                                             lineNumber: 145,
@@ -2166,51 +2245,51 @@ const Home = ()=>{
                                     lineNumber: 143,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "text-center py-12",
+                                    className: "text-center py-12 animate-fade-in",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "text-6xl mb-4",
+                                            className: "text-6xl mb-4 animate-bounce",
                                             children: "📋"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 150,
+                                            lineNumber: 156,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                            className: "text-xl font-semibold text-gray-900 mb-2",
-                                            children: isWorker ? "No projects available" : "No jobs posted yet"
+                                            className: "text-xl font-semibold text-green-800 mb-2",
+                                            children: isWorker ? "No projects available" : "No recently posted jobs yet"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 151,
+                                            lineNumber: 157,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-gray-600 mb-6",
+                                            className: "text-green-600 mb-6",
                                             children: isWorker ? "Check back later for new opportunities" : "Create your first job posting to get started"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 154,
+                                            lineNumber: 162,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         isEmployer && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "/dashboard",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                className: "bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200",
+                                                className: "bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-all duration-200 hover:scale-105 shadow-lg",
                                                 children: "Post a Job"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
-                                                lineNumber: 161,
+                                                lineNumber: 169,
                                                 columnNumber: 21
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 160,
+                                            lineNumber: 168,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/pages/index.tsx",
-                                    lineNumber: 149,
+                                    lineNumber: 155,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
@@ -2223,132 +2302,132 @@ const Home = ()=>{
                             className: `mt-8 grid grid-cols-1 ${isWorker ? "md:grid-cols-3" : "md:grid-cols-2"} gap-6`,
                             children: [
                                 isWorker && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "bg-white rounded-lg shadow-md border border-gray-100 p-6",
+                                    className: "bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-left",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                            className: "text-lg font-semibold text-gray-900 mb-2",
+                                            className: "text-lg font-semibold text-green-800 mb-2",
                                             children: "Offer Your Service"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 175,
+                                            lineNumber: 183,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-gray-600 mb-4",
+                                            className: "text-green-600 mb-4",
                                             children: "Create a new service listing to attract clients"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 178,
+                                            lineNumber: 186,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "/offer-service",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                className: "bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium",
+                                                className: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 hover:scale-105 font-medium shadow-md",
                                                 children: "Offer Service"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
-                                                lineNumber: 182,
+                                                lineNumber: 190,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 181,
+                                            lineNumber: 189,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/pages/index.tsx",
-                                    lineNumber: 174,
+                                    lineNumber: 182,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "bg-white rounded-lg shadow-md border border-gray-100 p-6",
+                                    className: "bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-up",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                            className: "text-lg font-semibold text-gray-900 mb-2",
+                                            className: "text-lg font-semibold text-green-800 mb-2",
                                             children: isWorker ? "My Applications" : "Applications Received"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 190,
+                                            lineNumber: 198,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-gray-600 mb-4",
+                                            className: "text-green-600 mb-4",
                                             children: isWorker ? "Track your submitted applications" : "Review applications for your jobs"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 193,
+                                            lineNumber: 201,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "/dashboard",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                className: "text-indigo-600 hover:text-indigo-500 font-medium",
+                                                className: "text-green-600 hover:text-green-700 font-medium transition-colors duration-200 hover:scale-105",
                                                 children: "View Dashboard →"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
-                                                lineNumber: 199,
+                                                lineNumber: 207,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 198,
+                                            lineNumber: 206,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/pages/index.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 197,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "bg-white rounded-lg shadow-md border border-gray-100 p-6",
+                                    className: "bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-right",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                            className: "text-lg font-semibold text-gray-900 mb-2",
+                                            className: "text-lg font-semibold text-green-800 mb-2",
                                             children: "Messages"
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 206,
+                                            lineNumber: 214,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-gray-600 mb-4",
+                                            className: "text-green-600 mb-4",
                                             children: [
                                                 "Communicate with ",
                                                 isWorker ? "employers" : "candidates"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 209,
+                                            lineNumber: 217,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$link$2e$js__$5b$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "/messages",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                className: "text-indigo-600 hover:text-indigo-500 font-medium",
+                                                className: "text-green-600 hover:text-green-700 font-medium transition-colors duration-200 hover:scale-105",
                                                 children: "Open Messages →"
                                             }, void 0, false, {
                                                 fileName: "[project]/pages/index.tsx",
-                                                lineNumber: 213,
+                                                lineNumber: 221,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/pages/index.tsx",
-                                            lineNumber: 212,
+                                            lineNumber: 220,
                                             columnNumber: 15
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/pages/index.tsx",
-                                    lineNumber: 205,
+                                    lineNumber: 213,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/pages/index.tsx",
-                            lineNumber: 170,
+                            lineNumber: 178,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     ]

@@ -84,18 +84,65 @@ export const getMessages = async (userId: string) => {
     .order("timestamp", { ascending: true });
 
   if (error) throw error;
-  return data;
+  return data.map((msg) => ({
+    id: msg.id,
+    senderId: msg.sender_id,
+    receiverId: msg.receiver_id,
+    content: msg.content,
+    timestamp: msg.timestamp,
+    status: msg.status || "sent",
+    file: msg.file,
+    sender: msg.sender,
+    receiver: msg.receiver,
+  }));
 };
 
 export const sendMessage = async (message: any) => {
+  const dbMessage = {
+    id: message.id,
+    sender_id: message.senderId,
+    receiver_id: message.receiverId,
+    content: message.content,
+    timestamp: message.timestamp,
+    ...(message.file && { file: message.file }),
+  };
+
   const { data, error } = await supabase
     .from("messages")
-    .insert(message)
+    .insert(dbMessage)
     .select()
     .single();
 
   if (error) throw error;
+  return {
+    id: data.id,
+    senderId: data.sender_id,
+    receiverId: data.receiver_id,
+    content: data.content,
+    timestamp: data.timestamp,
+    status: data.status || "sent",
+    file: data.file,
+  };
+};
+
+export const searchUsers = async (query: string) => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .ilike("name", `%${query}%`)
+    .limit(20);
+
+  if (error) throw error;
   return data;
+};
+
+export const markMessagesAsRead = async (messageIds: string[]) => {
+  const { error } = await supabase
+    .from("messages")
+    .update({ status: "read" })
+    .in("id", messageIds);
+
+  if (error) throw error;
 };
 
 export const createOrder = async (order: any) => {
@@ -161,6 +208,23 @@ export const createReview = async (review: any) => {
   const { data, error } = await supabase
     .from("reviews")
     .insert(newReview)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const createNotification = async (notification: any) => {
+  const { data, error } = await supabase
+    .from("notifications")
+    .insert({
+      user_id: notification.userId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      action_url: notification.actionUrl,
+    })
     .select()
     .single();
 

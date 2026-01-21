@@ -6,7 +6,11 @@ import React, {
   useEffect,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { getNotifications, markNotificationAsRead } from "../api/mockApi";
+import {
+  getNotifications,
+  markNotificationAsRead,
+  createNotification,
+} from "../api/mockApi";
 
 interface Notification {
   id: string;
@@ -74,20 +78,34 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const addNotification = (
+  const addNotification = async (
     notificationData: Omit<Notification, "id" | "read" | "createdAt">,
   ) => {
-    const newNotification: Notification = {
-      ...notificationData,
-      id: Date.now().toString(),
-      read: false,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const dbNotification = {
+        userId: user?.id,
+        type: notificationData.type,
+        title: notificationData.title,
+        message: notificationData.message,
+        actionUrl: notificationData.actionUrl,
+      };
 
-    setNotifications((prev) => [newNotification, ...prev]);
+      const saved = await createNotification(dbNotification);
 
-    // In a real app, you would also save this to the database
-    console.log("New notification added:", newNotification);
+      const newNotification: Notification = {
+        id: saved.id,
+        type: saved.type,
+        title: saved.title,
+        message: saved.message,
+        read: false,
+        createdAt: saved.created_at,
+        actionUrl: saved.action_url,
+      };
+
+      setNotifications((prev) => [newNotification, ...prev]);
+    } catch (error) {
+      console.error("Error adding notification:", error);
+    }
   };
 
   const markAsRead = async (notificationId: string) => {
