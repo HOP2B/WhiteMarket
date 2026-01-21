@@ -128,7 +128,7 @@ const SubscriptionPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
@@ -143,7 +143,7 @@ const SubscriptionPage: React.FC = () => {
                 onClick={() => setActiveTab("current")}
                 className={`px-6 py-4 text-sm font-medium ${
                   activeTab === "current"
-                    ? "border-b-2 border-green-500 text-green-600"
+                    ? "border-b-2 border-blue-500 text-blue-600"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -153,7 +153,7 @@ const SubscriptionPage: React.FC = () => {
                 onClick={() => setActiveTab("history")}
                 className={`px-6 py-4 text-sm font-medium ${
                   activeTab === "history"
-                    ? "border-b-2 border-green-500 text-green-600"
+                    ? "border-b-2 border-blue-500 text-blue-600"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -163,7 +163,7 @@ const SubscriptionPage: React.FC = () => {
                 onClick={() => setActiveTab("plans")}
                 className={`px-6 py-4 text-sm font-medium ${
                   activeTab === "plans"
-                    ? "border-b-2 border-green-500 text-green-600"
+                    ? "border-b-2 border-blue-500 text-blue-600"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -197,7 +197,7 @@ const SubscriptionPage: React.FC = () => {
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       currentSubscription.status === "active"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-blue-100 text-blue-800"
                         : "bg-red-100 text-red-800"
                     }`}
                   >
@@ -233,7 +233,7 @@ const SubscriptionPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Сарын төлбөр
                   </label>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-blue-600">
                     ₮{currentSubscription.amount.toLocaleString()}
                   </p>
                 </div>
@@ -245,7 +245,7 @@ const SubscriptionPage: React.FC = () => {
                     onClick={toggleAutoRenew}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       currentSubscription.autoRenew
-                        ? "bg-green-600"
+                        ? "bg-blue-600"
                         : "bg-gray-200"
                     }`}
                   >
@@ -267,7 +267,7 @@ const SubscriptionPage: React.FC = () => {
             <div className="flex space-x-4">
               <button
                 onClick={() => setActiveTab("plans")}
-                className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
               >
                 Төлөвлөгөө сайжруулах
               </button>
@@ -313,7 +313,7 @@ const SubscriptionPage: React.FC = () => {
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           subscription.status === "active"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-blue-100 text-blue-800"
                             : subscription.status === "cancelled"
                               ? "bg-red-100 text-red-800"
                               : "bg-gray-100 text-gray-800"
@@ -325,7 +325,7 @@ const SubscriptionPage: React.FC = () => {
                             ? "Цуцлагдсан"
                             : "Дууссан"}
                       </span>
-                      <p className="text-lg font-bold text-green-600 mt-1">
+                      <p className="text-lg font-bold text-blue-600 mt-1">
                         ₮{subscription.amount.toLocaleString()}
                       </p>
                     </div>
@@ -360,25 +360,25 @@ const SubscriptionPage: React.FC = () => {
                 <div
                   key={plan.name}
                   className={`bg-white rounded-lg shadow-md p-6 ${
-                    plan.popular ? "border-2 border-green-500" : ""
+                    plan.popular ? "border-2 border-blue-500" : ""
                   }`}
                 >
                   {plan.popular && (
-                    <div className="bg-green-500 text-white text-sm px-3 py-1 rounded-full inline-block mb-4">
+                    <div className="bg-blue-500 text-white text-sm px-3 py-1 rounded-full inline-block mb-4">
                       Most Popular
                     </div>
                   )}
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     {plan.name}
                   </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-6">
+                  <div className="text-3xl font-bold text-blue-600 mb-6">
                     ₮{plan.price.toLocaleString()}
                     <span className="text-lg text-gray-500">/сар</span>
                   </div>
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-center">
-                        <span className="text-green-500 mr-2">✓</span>
+                        <span className="text-blue-500 mr-2">✓</span>
                         <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
@@ -451,7 +451,7 @@ const SubscriptionPage: React.FC = () => {
                 </button>
                 <button
                   onClick={confirmUpgrade}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Баталгаажуулах
                 </button>

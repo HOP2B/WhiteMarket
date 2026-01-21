@@ -130,7 +130,7 @@ const PaymentMethodsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
@@ -144,7 +144,7 @@ const PaymentMethodsPage: React.FC = () => {
             </h2>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               Шинэ данс нэмэх
             </button>
@@ -173,14 +173,14 @@ const PaymentMethodsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   {method.default && (
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                       Үндсэн
                     </span>
                   )}
                   {!method.default && (
                     <button
                       onClick={() => handleSetDefault(method.id)}
-                      className="text-green-600 hover:text-green-700 text-sm"
+                      className="text-blue-600 hover:text-blue-700 text-sm"
                     >
                       Үндсэн болгох
                     </button>
@@ -229,7 +229,7 @@ const PaymentMethodsPage: React.FC = () => {
                     onChange={(e) =>
                       setNewMethod({ ...newMethod, type: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="qpay">QPay</option>
                     <option value="socialpay">Social Pay</option>
@@ -247,7 +247,7 @@ const PaymentMethodsPage: React.FC = () => {
                     onChange={(e) =>
                       setNewMethod({ ...newMethod, name: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Жишээ: QPay данс"
                   />
                 </div>
@@ -262,7 +262,7 @@ const PaymentMethodsPage: React.FC = () => {
                     onChange={(e) =>
                       setNewMethod({ ...newMethod, account: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Жишээ: ****1234"
                   />
                 </div>
@@ -277,7 +277,7 @@ const PaymentMethodsPage: React.FC = () => {
                 </button>
                 <button
                   onClick={handleAddPaymentMethod}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Нэмэх
                 </button>
@@ -315,7 +315,7 @@ const PaymentMethodsPage: React.FC = () => {
                         type: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="qpay">QPay</option>
                     <option value="socialpay">Social Pay</option>
@@ -336,7 +336,7 @@ const PaymentMethodsPage: React.FC = () => {
                         name: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Жишээ: QPay данс"
                   />
                 </div>
@@ -354,7 +354,7 @@ const PaymentMethodsPage: React.FC = () => {
                         account: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Жишээ: ****1234"
                   />
                 </div>
@@ -369,7 +369,7 @@ const PaymentMethodsPage: React.FC = () => {
                 </button>
                 <button
                   onClick={handleEditPaymentMethod}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Хадгалах
                 </button>

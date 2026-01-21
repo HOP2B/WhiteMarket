@@ -283,18 +283,18 @@ const Messages: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-green-50 to-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+      <div className="flex justify-center items-center h-screen bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-2xl font-bold text-green-800 animate-fade-in">
+          <h1 className="text-2xl font-bold text-blue-800 animate-fade-in">
             Please login to view messages
           </h1>
         </div>
@@ -303,7 +303,7 @@ const Messages: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-blue-800 mb-8 animate-fade-in">
@@ -323,7 +323,7 @@ const Messages: React.FC = () => {
                     setUserSearchQuery("");
                     setUserSearchResults([]);
                   }}
-                  className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors duration-200 hover:scale-105"
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200 hover:scale-105"
                 >
                   {showUserSearch ? "Back to Conversations" : "Search Users"}
                 </button>
@@ -345,7 +345,7 @@ const Messages: React.FC = () => {
                   placeholder="Хайх..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 />
               )}
             </div>
@@ -369,7 +369,10 @@ const Messages: React.FC = () => {
                     >
                       <div className="flex items-center">
                         <img
-                          src={userResult.avatar || "/default-avatar.jpg"}
+                          src={
+                            userResult.avatar ||
+                            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                          }
                           alt={userResult.name}
                           className="w-10 h-10 rounded-full mr-3"
                         />
@@ -401,9 +404,9 @@ const Messages: React.FC = () => {
                     return (
                       <div
                         key={conversationId}
-                        className={`p-4 cursor-pointer hover:bg-green-50 transition-all duration-200 hover:shadow-md ${
+                        className={`p-4 cursor-pointer hover:bg-blue-50 transition-all duration-200 hover:shadow-md ${
                           selectedConversation === conversationId
-                            ? "bg-green-100 border-l-4 border-green-500"
+                            ? "bg-blue-100 border-l-4 border-blue-500"
                             : ""
                         }`}
                         onClick={() => setSelectedConversation(conversationId)}
@@ -411,12 +414,15 @@ const Messages: React.FC = () => {
                         <div className="flex items-center">
                           <div className="relative">
                             <img
-                              src={otherUser?.avatar || "/default-avatar.jpg"}
+                              src={
+                                otherUser?.avatar ||
+                                "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                              }
                               alt={otherUser?.name || "User"}
                               className="w-10 h-10 rounded-full mr-3"
                             />
                             {userStatus?.isOnline && (
-                              <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                              <div className="absolute bottom-0 right-3 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
                             )}
                           </div>
                           <div className="flex-1">
@@ -437,7 +443,7 @@ const Messages: React.FC = () => {
                                 {lastMessage?.content || "No messages yet"}
                               </p>
                               {unreadCount > 0 && (
-                                <span className="bg-green-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center ml-2 animate-pulse shadow-lg">
+                                <span className="bg-blue-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center ml-2 animate-pulse shadow-lg">
                                   {unreadCount}
                                 </span>
                               )}

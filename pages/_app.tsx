@@ -19,7 +19,9 @@ function AppContent({ Component, pageProps, router }: AppProps) {
 
 export default function App(appProps: AppProps) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    >
       <AuthProvider>
         <NotificationProvider>
           <AppProvider>
