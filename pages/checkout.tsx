@@ -170,7 +170,7 @@ const CheckoutPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -200,7 +200,7 @@ const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Тооцоо хийх</h1>
@@ -214,7 +214,10 @@ const CheckoutPage: React.FC = () => {
               </h2>
               <div className="flex items-center mb-4">
                 <img
-                  src={gig.userAvatar}
+                  src={
+                    gig.userAvatar ||
+                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                  }
                   alt={gig.userName}
                   className="w-12 h-12 rounded-full mr-4"
                 />
@@ -235,7 +238,7 @@ const CheckoutPage: React.FC = () => {
                     type="text"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Промо код оруулна уу"
                   />
                   <button
@@ -254,14 +257,14 @@ const CheckoutPage: React.FC = () => {
                   <span>₮{gig.price.toLocaleString()}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-blue-600">
                     <span>Хөнгөлөлт:</span>
                     <span>-₮{discount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-lg font-semibold">Нийт:</span>
-                  <span className="text-2xl font-bold text-green-600">
+                  <span className="text-2xl font-bold text-blue-600">
                     ₮{calculateTotal().toLocaleString()}
                   </span>
                 </div>
@@ -279,7 +282,7 @@ const CheckoutPage: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setShowOrderDetails(!showOrderDetails)}
-                  className="text-green-600 hover:text-green-700 text-sm"
+                  className="text-blue-600 hover:text-blue-700 text-sm"
                 >
                   {showOrderDetails ? "Хураах" : "Дэлгэрэнгүй"}
                 </button>
@@ -299,7 +302,7 @@ const CheckoutPage: React.FC = () => {
                           requirements: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={4}
                       placeholder="Үйлчилгээний талаархи дэлгэрэнгүй шаардлага, хүссэн үр дүн зэргийг бичнэ үү..."
                     />
@@ -323,7 +326,7 @@ const CheckoutPage: React.FC = () => {
                           .toISOString()
                           .split("T")[0]
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -339,7 +342,7 @@ const CheckoutPage: React.FC = () => {
                           specialInstructions: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={3}
                       placeholder="Нэмэлт тайлбар, файлын линк зэрэг..."
                     />
@@ -425,8 +428,8 @@ const CheckoutPage: React.FC = () => {
                     htmlFor="bank"
                     className="flex items-center cursor-pointer"
                   >
-                    <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center mr-3">
-                      <span className="text-green-600 font-semibold text-sm">
+                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center mr-3">
+                      <span className="text-blue-600 font-semibold text-sm">
                         Б
                       </span>
                     </div>
@@ -444,7 +447,7 @@ const CheckoutPage: React.FC = () => {
                 <button
                   onClick={handlePayment}
                   disabled={processing}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? (
                     <div className="flex items-center justify-center">

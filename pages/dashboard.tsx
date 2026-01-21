@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
     .reduce((sum, order) => sum + order.amount, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-green-800 mb-8 animate-fade-in">
@@ -146,7 +146,10 @@ const Dashboard: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center mb-6">
                 <img
-                  src={user.avatar || "/default-avatar.jpg"}
+                  src={
+                    user.avatar ||
+                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                  }
                   alt={user.name}
                   className="w-16 h-16 rounded-full mr-4"
                 />
@@ -203,7 +206,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => setActiveTab("settings")}
                   className={`w-full text-left p-2 rounded-md ${
                     activeTab === "settings"
-                      ? "bg-green-600 text-white"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -229,7 +232,7 @@ const Dashboard: React.FC = () => {
                     <h3 className="text-lg font-semibold mb-2">Total Orders</h3>
                     <p className="text-3xl font-bold">{userOrders.length}</p>
                   </div>
-                  <div className="bg-yellow-600 text-white rounded-lg p-6">
+                  <div className="bg-blue-600 text-white rounded-lg p-6">
                     <h3 className="text-lg font-semibold mb-2">Earnings</h3>
                     <p className="text-3xl font-bold">
                       ${totalEarnings.toFixed(2)}
@@ -243,7 +246,7 @@ const Dashboard: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-4">
                         <span className="text-white font-bold">G</span>
                       </div>
                       <div>
@@ -270,7 +273,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-center">
                   <button
                     onClick={() => setShowQuickCreate(true)}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 shadow-lg"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg"
                   >
                     <span>+</span>
                     <span>Quick Create Service</span>
@@ -287,7 +290,7 @@ const Dashboard: React.FC = () => {
                   </h2>
                   <button
                     onClick={() => router.push("/offer-service")}
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                   >
                     Create New Service
                   </button>
@@ -345,7 +348,7 @@ const Dashboard: React.FC = () => {
                     </p>
                     <button
                       onClick={() => router.push("/offer-service")}
-                      className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+                      className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
                     >
                       Create First Service
                     </button>
@@ -373,7 +376,7 @@ const Dashboard: React.FC = () => {
                           <span
                             className={`text-sm px-2 py-1 rounded-full ${
                               order.status === "completed"
-                                ? "bg-green-100 text-green-800"
+                                ? "bg-blue-100 text-blue-800"
                                 : "bg-yellow-100 text-yellow-800"
                             }`}
                           >

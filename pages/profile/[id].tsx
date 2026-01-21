@@ -120,11 +120,14 @@ const EditProfileModal: React.FC<{
                 <div className="flex items-center space-x-6">
                   <div className="relative">
                     <img
-                      src={formData.avatar || "/default-avatar.jpg"}
+                      src={
+                        formData.avatar ||
+                        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                      }
                       alt="Avatar"
                       className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
                     />
-                    <label className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 cursor-pointer hover:bg-green-700">
+                    <label className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 cursor-pointer hover:bg-blue-700">
                       <input
                         type="file"
                         accept="image/*"
@@ -336,7 +339,7 @@ const EditProfileModal: React.FC<{
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Хадгалах
               </button>
@@ -388,14 +391,14 @@ const UserProfile: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-2xl font-bold text-gray-900">User not found</h1>
@@ -413,7 +416,10 @@ const UserProfile: React.FC = () => {
             <div className="w-full md:w-1/3">
               <div className="text-center mb-6">
                 <img
-                  src={user.avatar || "/default-avatar.jpg"}
+                  src={
+                    user.avatar ||
+                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
+                  }
                   alt={user.name}
                   className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
                 />
@@ -426,7 +432,7 @@ const UserProfile: React.FC = () => {
                   <span className="ml-1 text-gray-500">(24 reviews)</span>
                 </div>
                 <p className="text-gray-600 text-sm mb-4">
-                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                   Улаанбаатар, Монгол
                 </p>
               </div>
@@ -434,7 +440,7 @@ const UserProfile: React.FC = () => {
               <div className="space-y-3 mb-6">
                 <button
                   onClick={() => router.push(`/messages?contact=${id}`)}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors"
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Зурвас илгээх
                 </button>
@@ -500,7 +506,7 @@ const UserProfile: React.FC = () => {
                     onClick={() => setActiveTab("services")}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === "services"
-                        ? "border-green-500 text-green-600"
+                        ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:text-gray-700"
                     }`}
                   >
@@ -510,7 +516,7 @@ const UserProfile: React.FC = () => {
                     onClick={() => setActiveTab("reviews")}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === "reviews"
-                        ? "border-green-500 text-green-600"
+                        ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:text-gray-700"
                     }`}
                   >
