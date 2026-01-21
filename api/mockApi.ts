@@ -475,3 +475,62 @@ export const updateGig = async (gigId: string, updates: any) => {
   if (error) throw error;
   return data;
 };
+
+// Mock data for homepage
+export const getJobCategories = () => {
+  return [
+    { id: "in-demand", name: "In Demand", icon: "🔥" },
+    { id: "high-pay", name: "High Pay", icon: "💰" },
+    { id: "part-time", name: "Part-Time", icon: "⏰" },
+    { id: "freelance", name: "Freelance", icon: "💼" },
+    { id: "remote", name: "Remote", icon: "🏠" },
+    { id: "new-jobs", name: "New Jobs", icon: "🆕" },
+  ];
+};
+
+export const getTestimonials = () => {
+  return [
+    {
+      id: "1",
+      name: "Sarah Johnson",
+      role: "Graphic Designer",
+      review:
+        "Found amazing freelance opportunities that perfectly match my skills. The platform is easy to use and connects me with great clients.",
+      rating: 5,
+      avatar: "/avatars/sarah.jpg",
+    },
+    {
+      id: "2",
+      name: "Mike Chen",
+      role: "Web Developer",
+      review:
+        "As a freelancer, this platform has been a game-changer. I get paid quickly and the job quality is consistently high.",
+      rating: 5,
+      avatar: "/avatars/mike.jpg",
+    },
+    {
+      id: "3",
+      name: "Emma Davis",
+      role: "Content Writer",
+      review:
+        "The variety of jobs available is incredible. I've been able to build a steady income stream through consistent, well-paying projects.",
+      rating: 4,
+      avatar: "/avatars/emma.jpg",
+    },
+  ];
+};
+
+export const getFeaturedJobs = async () => {
+  // For now, return the latest gigs as featured jobs
+  const gigs = await getGigs();
+  return gigs.slice(0, 6).map((gig) => ({
+    id: gig.id,
+    title: gig.title,
+    description: gig.description,
+    budget: gig.price,
+    jobType: gig.category,
+    company: gig.userName,
+    location: "Remote", // Mock location
+    postedDate: "2 days ago", // Mock date
+  }));
+};

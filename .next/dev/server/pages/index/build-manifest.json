@@ -6,7 +6,7 @@
   "rootMainFiles": [],
   "pages": {
     "/": [
-      "static/chunks/[root-of-the-server]__e645e507._.js",
+      "static/chunks/[root-of-the-server]__b22ec5ad._.js",
       "static/chunks/node_modules_next_dist_compiled_caaa605a._.js",
       "static/chunks/node_modules_next_dist_shared_lib_15080aa3._.js",
       "static/chunks/node_modules_next_dist_client_881bc7f7._.js",
@@ -18,7 +18,7 @@
       "static/chunks/node_modules_@supabase_auth-js_dist_module_e0400d86._.js",
       "static/chunks/node_modules_c02cab5f._.js",
       "static/chunks/pages_index_2da965e7._.js",
-      "static/chunks/turbopack-pages_index_5b12e19b._.js"
+      "static/chunks/turbopack-pages_index_376bcc83._.js"
     ]
   },
   "ampFirstPages": []

@@ -29,7 +29,7 @@ const Jobs: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
-  const [sortBy, setSortBy] = useState("relevance");
+  const [sortBy, setSortBy] = useState("newest");
   const [minRating, setMinRating] = useState("");
 
   const fetchData = async () => {
@@ -93,200 +93,170 @@ const Jobs: React.FC = () => {
   if (loading && gigs.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex flex-col">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-green-800 mb-2">
-            Үйлчилгээ хайх
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-4xl w-full">
+          {/* Search and Filters */}
+          <div className="bg-white rounded-xl shadow-lg border border-blue-200 p-6 mb-8 animate-slide-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              {/* Search Input */}
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">
+                  Хайх
+                </label>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Үйлчилгээний нэр..."
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">
+                  Ангилал
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                >
+                  <option value="">Бүгд</option>
+                  {categories.map((category) => (
+                    <option key={category.name} value={category.name}>
+                      {category.name} ({category.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Үнийн хязгаар
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={priceRange.min}
+                    onChange={(e) =>
+                      setPriceRange({ ...priceRange, min: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={priceRange.max}
+                    onChange={(e) =>
+                      setPriceRange({ ...priceRange, max: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Rating Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Хамгийн бага үнэлгээ
+                </label>
+                <select
+                  value={minRating}
+                  onChange={(e) => setMinRating(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Бүгд</option>
+                  <option value="4">4+ од</option>
+                  <option value="3">3+ од</option>
+                  <option value="2">2+ од</option>
+                  <option value="1">1+ од</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Sort and Actions */}
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-4">
+                <label className="text-sm font-medium text-gray-700">
+                  Эрэмбэлэх:
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="relevance">Холбогдолтой</option>
+                  <option value="price_low">Үнэ: багаас их</option>
+                  <option value="price_high">Үнэ: ихээс бага</option>
+                  <option value="rating">Үнэлгээ</option>
+                  <option value="newest">Хамгийн шинэ</option>
+                </select>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Шүүлтүүрийг цэвэрлэх
+                </button>
+                <button
+                  onClick={handleSearch}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Хайх
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recently Posted Jobs */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-blue-800 mb-4">
+            Recently Posted Jobs
+          </h2>
+        </div>
+
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 animate-bounce">
+            <span className="text-2xl" role="img" aria-label="Jobs">
+              📋
+            </span>
+          </div>
+          <h1 className="text-4xl font-bold text-blue-800 mb-4">
+            Recently Posted Jobs
           </h1>
-          <p className="text-green-600">
-            Чадварлаг freelancer-үүдээс үйлчилгээ сонгон аваарай
+          <p className="text-lg text-blue-600">
+            Browse the latest job opportunities from all users
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6 mb-8 animate-slide-in-up">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {/* Search Input */}
-            <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
-                Хайх
-              </label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Үйлчилгээний нэр..."
-                className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
-              />
+        <div className="bg-white rounded-xl shadow-xl border border-blue-200 p-8 animate-slide-in-up">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
             </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
-                Ангилал
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
-              >
-                <option value="">Бүгд</option>
-                {categories.map((category) => (
-                  <option key={category.name} value={category.name}>
-                    {category.name} ({category.count})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Үнийн хязгаар
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={priceRange.min}
-                  onChange={(e) =>
-                    setPriceRange({ ...priceRange, min: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={priceRange.max}
-                  onChange={(e) =>
-                    setPriceRange({ ...priceRange, max: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-            </div>
-
-            {/* Rating Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Хамгийн бага үнэлгээ
-              </label>
-              <select
-                value={minRating}
-                onChange={(e) => setMinRating(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">Бүгд</option>
-                <option value="4">4+ од</option>
-                <option value="3">3+ од</option>
-                <option value="2">2+ од</option>
-                <option value="1">1+ од</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Sort and Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">
-                Эрэмбэлэх:
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="relevance">Холбогдолтой</option>
-                <option value="price_low">Үнэ: багаас их</option>
-                <option value="price_high">Үнэ: ихээс бага</option>
-                <option value="rating">Үнэлгээ</option>
-                <option value="newest">Хамгийн шинэ</option>
-              </select>
-            </div>
-
-            <div className="flex space-x-2">
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Шүүлтүүрийг цэвэрлэх
-              </button>
-              <button
-                onClick={handleSearch}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              >
-                Хайх
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Results */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar with Categories */}
-          <div className="lg:w-1/4">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Ангилалууд
-              </h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setSelectedCategory("");
-                    handleSearch();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-md ${
-                    selectedCategory === ""
-                      ? "bg-green-100 text-green-800"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+          ) : gigs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gigs.map((gig, index) => (
+                <div
+                  key={gig.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  Бүгд ({gigs.length})
-                </button>
-                {categories.map((category) => (
-                  <button
-                    key={category.name}
-                    onClick={() => {
-                      setSelectedCategory(category.name);
-                      handleSearch();
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-md ${
-                      selectedCategory === category.name
-                        ? "bg-green-100 text-green-800"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {category.name} ({category.count})
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:w-3/4">
-            <div className="mb-4">
-              <p className="text-gray-600">{gigs.length} үйлчилгээ олдлоо</p>
-            </div>
-
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
-              </div>
-            ) : gigs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {gigs.map((gig) => (
                   <div
-                    key={gig.id}
                     className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => router.push(`/gigs/${gig.id}`)}
                   >
@@ -322,28 +292,26 @@ const Jobs: React.FC = () => {
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                           {gig.category}
                         </span>
-                        <span className="text-xl font-bold text-green-600">
+                        <span className="text-xl font-bold text-blue-600">
                           ₮{gig.price.toLocaleString()}
                         </span>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  Таны хайлтад тохирох үйлчилгээ олдсонгүй
-                </p>
-                <button
-                  onClick={clearFilters}
-                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
-                >
-                  Шүүлтүүрийг цэвэрлэх
-                </button>
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 animate-fade-in">
+              <div className="text-6xl mb-4 animate-bounce">📋</div>
+              <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                No recently posted jobs yet
+              </h3>
+              <p className="text-blue-600 mb-6">
+                Check back later for new opportunities
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

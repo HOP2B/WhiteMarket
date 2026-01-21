@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
@@ -8,15 +8,16 @@ import NotificationDropdown from "./NotificationDropdown";
 const Navbar: React.FC = () => {
   const { user } = useAuth();
   const { unreadCount, toggleNotifications } = useNotifications();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16 lg:grid lg:grid-cols-3 lg:items-center">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-green-600">
-                WhiteMarket
+              <Link href="/" className="text-xl font-bold text-blue-600">
+                White Market
               </Link>
             </div>
           </div>

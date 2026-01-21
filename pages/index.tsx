@@ -1,231 +1,300 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
-import GigCard from "../components/GigCard";
-import { getGigs } from "../api/mockApi";
-import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabase";
+import {
+  getFeaturedJobs,
+  getJobCategories,
+  getTestimonials,
+} from "../api/mockApi";
 
 const Home: React.FC = () => {
-  const { user } = useAuth();
-  const [gigs, setGigs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGigs = async () => {
+    const fetchData = async () => {
       try {
-        let data;
-        if (user?.unsafeMetadata?.role === "employer" && user.id) {
-          // Fetch employer's own gigs
-          const { data: employerGigs, error } = await supabase
-            .from("gigs")
-            .select(
-              `
-              *,
-              users!inner(name, avatar)
-            `,
-            )
-            .eq("user_id", user.id);
-          if (error) throw error;
-          data = employerGigs.map((gig) => ({
-            ...gig,
-            userName: gig.users.name,
-            userAvatar: gig.users.avatar,
-          }));
-        } else {
-          // Fetch all gigs for workers or guests
-          data = await getGigs();
-        }
-        setGigs(data);
+        const [jobsData, categoriesData, testimonialsData] = await Promise.all([
+          getFeaturedJobs(),
+          getJobCategories(),
+          getTestimonials(),
+        ]);
+        setJobs(jobsData);
+        setCategories(categoriesData);
+        setTestimonials(testimonialsData);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching gigs:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
 
-    fetchGigs();
-  }, [user]);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md w-full text-center animate-fade-in">
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-green-800 mb-4">
-                Welcome to WhiteMarket
-              </h1>
-              <p className="text-lg text-green-600">
-                Connect with talented freelancers or find the perfect job for
-                your skills.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <Link href="/login" className="block">
-                <button className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transform transition-all duration-200 hover:scale-105">
-                  <span className="mr-2">🚀</span>
-                  Get Started
-                </button>
-              </Link>
-              <div className="text-sm text-green-500">
-                Join as a{" "}
-                <Link
-                  href="/register"
-                  className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
-                >
-                  Worker
-                </Link>{" "}
-                or{" "}
-                <Link
-                  href="/register"
-                  className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
-                >
-                  Employer
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const userRole = user.unsafeMetadata?.role;
-  const isWorker = userRole === "worker";
-  const isEmployer = userRole === "employer";
+    fetchData();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex flex-col">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-4xl w-full">
-          <div className="text-center mb-12 animate-fade-in">
-            <div
-              className={`inline-flex items-center justify-center w-16 h-16 ${isWorker ? "bg-green-100" : "bg-green-200"} rounded-full mb-4 animate-bounce`}
-            >
-              <span
-                className="text-2xl"
-                role="img"
-                aria-label={isWorker ? "Worker" : "Employer"}
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-50 to-blue-100 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            Find work. Get paid.
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Explore freelance and part-time jobs across Mongolia.
+          </p>
+          <div className="max-w-md mx-auto mb-8">
+            <input
+              type="text"
+              placeholder="Job title, keyword, location…"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold">
+            Find Jobs
+          </button>
+        </div>
+      </section>
+
+      {/* Category Filters */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center gap-4">
+            {categories.map((category: any) => (
+              <button
+                key={category.id}
+                className="flex items-center px-6 py-3 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200"
               >
-                {isWorker ? "👷" : "🏢"}
-              </span>
-            </div>
-            <h1 className="text-4xl font-bold text-green-800 mb-4">
-              {isWorker ? "Find Your Next Opportunity" : "Manage Your Projects"}
-            </h1>
-            <p className="text-lg text-green-600">
-              {isWorker
-                ? "Discover exciting projects and showcase your skills"
-                : "Oversee recently posted jobs and connect with talented professionals"}
+                <span className="mr-2">{category.icon}</span>
+                <span className="font-medium text-gray-700">
+                  {category.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Jobs Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Latest Jobs
+            </h2>
+            <p className="text-gray-600">
+              Discover the most recent job opportunities
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-xl border border-green-200 p-8 animate-slide-in-up">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-green-800 mb-2">
-                {isWorker ? "Available Projects" : "Recently Posted Jobs"}
-              </h2>
-              <p className="text-green-600">
-                {isWorker
-                  ? "Browse and apply for projects that match your expertise"
-                  : "Track applications and manage your job postings"}
-              </p>
+          {loading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
             </div>
-
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
-              </div>
-            ) : gigs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {gigs.map((gig, index) => (
-                  <div
-                    key={gig.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <GigCard gig={gig} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {jobs.map((job: any) => (
+                <div
+                  key={job.id}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {job.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {job.description}
+                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      {job.jobType}
+                    </span>
+                    <span className="text-lg font-bold text-blue-600">
+                      ₮{job.budget.toLocaleString()}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 animate-fade-in">
-                <div className="text-6xl mb-4 animate-bounce">📋</div>
-                <h3 className="text-xl font-semibold text-green-800 mb-2">
-                  {isWorker
-                    ? "No projects available"
-                    : "No recently posted jobs yet"}
-                </h3>
-                <p className="text-green-600 mb-6">
-                  {isWorker
-                    ? "Check back later for new opportunities"
-                    : "Create your first job posting to get started"}
-                </p>
-                {isEmployer && (
-                  <Link href="/dashboard">
-                    <button className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-all duration-200 hover:scale-105 shadow-lg">
-                      Post a Job
-                    </button>
-                  </Link>
-                )}
-              </div>
-            )}
+                  <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+                    View Job
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-gray-600">
+              Get started in just a few simple steps
+            </p>
           </div>
 
-          <div
-            className={`mt-8 grid grid-cols-1 ${isWorker ? "md:grid-cols-3" : "md:grid-cols-2"} gap-6`}
-          >
-            {isWorker && (
-              <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-left">
-                <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  Offer Your Service
-                </h3>
-                <p className="text-green-600 mb-4">
-                  Create a new service listing to attract clients
-                </p>
-                <Link href="/offer-service">
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 hover:scale-105 font-medium shadow-md">
-                    Offer Service
-                  </button>
-                </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📝</span>
               </div>
-            )}
-
-            <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-up">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
-                {isWorker ? "My Applications" : "Applications Received"}
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Sign Up
               </h3>
-              <p className="text-green-600 mb-4">
-                {isWorker
-                  ? "Track your submitted applications"
-                  : "Review applications for your jobs"}
+              <p className="text-gray-600">
+                Create your account and set up your profile
               </p>
-              <Link href="/dashboard">
-                <button className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200 hover:scale-105">
-                  View Dashboard →
-                </button>
-              </Link>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300 animate-slide-in-right">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
-                Messages
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🔍</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Find Jobs
               </h3>
-              <p className="text-green-600 mb-4">
-                Communicate with {isWorker ? "employers" : "candidates"}
+              <p className="text-gray-600">
+                Browse and apply for jobs that match your skills
               </p>
-              <Link href="/messages">
-                <button className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200 hover:scale-105">
-                  Open Messages →
-                </button>
-              </Link>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Get Paid
+              </h3>
+              <p className="text-gray-600">
+                Complete work and receive payment securely
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              What Our Users Say
+            </h2>
+            <p className="text-gray-600">
+              Hear from freelancers who have found success on our platform
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial: any) => (
+              <div
+                key={testimonial.id}
+                className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
+              >
+                <div className="flex items-center mb-4">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full mr-4"
+                  />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">
+                      {testimonial.name}
+                    </h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-4">"{testimonial.review}"</p>
+                <div className="flex text-yellow-400">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <span key={i}>★</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-blue-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Post your first job and find the best talent today
+          </h2>
+          <p className="text-blue-100 mb-8">
+            Connect with skilled professionals and get your projects done
+            efficiently
+          </p>
+          <Link href="/dashboard">
+            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 font-semibold">
+              Post Job
+            </button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">White Market</h3>
+              <p className="text-gray-400">
+                Connecting talent with opportunity in Mongolia.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Jobs</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <Link href="/jobs" className="hover:text-white">
+                    Browse Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard" className="hover:text-white">
+                    Post a Job
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <Link href="/about" className="hover:text-white">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <Link href="/terms" className="hover:text-white">
+                    Terms & Privacy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

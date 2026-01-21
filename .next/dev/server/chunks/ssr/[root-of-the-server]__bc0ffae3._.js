@@ -300,10 +300,14 @@ __turbopack_context__.s([
     ()=>getCategories,
     "getFavorites",
     ()=>getFavorites,
+    "getFeaturedJobs",
+    ()=>getFeaturedJobs,
     "getGigById",
     ()=>getGigById,
     "getGigs",
     ()=>getGigs,
+    "getJobCategories",
+    ()=>getJobCategories,
     "getMessages",
     ()=>getMessages,
     "getNotifications",
@@ -312,6 +316,8 @@ __turbopack_context__.s([
     ()=>getOrders,
     "getReviews",
     ()=>getReviews,
+    "getTestimonials",
+    ()=>getTestimonials,
     "getUserById",
     ()=>getUserById,
     "getUserStats",
@@ -703,6 +709,82 @@ const updateGig = async (gigId, updates)=>{
     const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2e$ts__$5b$ssr$5d$__$28$ecmascript$29$__["supabase"].from("gigs").update(updates).eq("id", gigId).select().single();
     if (error) throw error;
     return data;
+};
+const getJobCategories = ()=>{
+    return [
+        {
+            id: "in-demand",
+            name: "In Demand",
+            icon: "🔥"
+        },
+        {
+            id: "high-pay",
+            name: "High Pay",
+            icon: "💰"
+        },
+        {
+            id: "part-time",
+            name: "Part-Time",
+            icon: "⏰"
+        },
+        {
+            id: "freelance",
+            name: "Freelance",
+            icon: "💼"
+        },
+        {
+            id: "remote",
+            name: "Remote",
+            icon: "🏠"
+        },
+        {
+            id: "new-jobs",
+            name: "New Jobs",
+            icon: "🆕"
+        }
+    ];
+};
+const getTestimonials = ()=>{
+    return [
+        {
+            id: "1",
+            name: "Sarah Johnson",
+            role: "Graphic Designer",
+            review: "Found amazing freelance opportunities that perfectly match my skills. The platform is easy to use and connects me with great clients.",
+            rating: 5,
+            avatar: "/avatars/sarah.jpg"
+        },
+        {
+            id: "2",
+            name: "Mike Chen",
+            role: "Web Developer",
+            review: "As a freelancer, this platform has been a game-changer. I get paid quickly and the job quality is consistently high.",
+            rating: 5,
+            avatar: "/avatars/mike.jpg"
+        },
+        {
+            id: "3",
+            name: "Emma Davis",
+            role: "Content Writer",
+            review: "The variety of jobs available is incredible. I've been able to build a steady income stream through consistent, well-paying projects.",
+            rating: 4,
+            avatar: "/avatars/emma.jpg"
+        }
+    ];
+};
+const getFeaturedJobs = async ()=>{
+    // For now, return the latest gigs as featured jobs
+    const gigs = await getGigs();
+    return gigs.slice(0, 6).map((gig)=>({
+            id: gig.id,
+            title: gig.title,
+            description: gig.description,
+            budget: gig.price,
+            jobType: gig.category,
+            company: gig.userName,
+            location: "Remote",
+            postedDate: "2 days ago"
+        }));
 };
 __turbopack_async_result__();
 } catch(e) { __turbopack_async_result__(e); } }, false);}),
