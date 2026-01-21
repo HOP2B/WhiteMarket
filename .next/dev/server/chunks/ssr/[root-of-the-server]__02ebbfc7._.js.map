@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/khangaijagaa/Documents/projects/white-market/pages/login.tsx"],"sourcesContent":["import { SignIn } from \"@clerk/nextjs\";\n\nconst Login = () => {\n  return (\n    <div className=\"min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8\">\n      <div className=\"sm:mx-auto sm:w-full sm:max-w-md\">\n        <h2 className=\"mt-6 text-center text-3xl font-extrabold text-gray-900\">\n          Sign in to your account\n        </h2>\n      </div>\n      <div className=\"mt-8 sm:mx-auto sm:w-full sm:max-w-md\">\n        <SignIn\n          path=\"/login\"\n          routing=\"path\"\n          signUpUrl=\"/register\"\n          redirectUrl=\"/\"\n        />\n      </div>\n    </div>\n  );\n};\n\nexport default Login;\n"],"names":[],"mappings":";;;;;AAAA;;;AAEA,MAAM,QAAQ;IACZ,qBACE,qKAAC;QAAI,WAAU;;0BACb,qKAAC;gBAAI,WAAU;0BACb,cAAA,qKAAC;oBAAG,WAAU;8BAAyD;;;;;;;;;;;0BAIzE,qKAAC;gBAAI,WAAU;0BACb,cAAA,qKAAC,yMAAM;oBACL,MAAK;oBACL,SAAQ;oBACR,WAAU;oBACV,aAAY;;;;;;;;;;;;;;;;;AAKtB;uCAEe"}}]
-}
