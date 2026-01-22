@@ -25,20 +25,20 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/dashboard": [
+    "/checkout": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/dashboard.js"
+      "static/chunks/pages/checkout.js"
+    ],
+    "/gigs/[id]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/gigs/[id].js"
     ],
     "/jobs": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/jobs.js"
-    ],
-    "/messages": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/messages.js"
     ]
   },
   "ampFirstPages": []
