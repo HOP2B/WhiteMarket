@@ -89,7 +89,7 @@ const Register: React.FC = () => {
             path="/register"
             routing="path"
             signInUrl="/login"
-            redirectUrl="/"
+            redirectUrl="/complete-profile"
             unsafeMetadata={{ role }}
             appearance={{
               elements: {

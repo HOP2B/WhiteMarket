@@ -434,8 +434,25 @@ export const getUserStats = async (userId: string) => {
 };
 
 export const updateUserProfile = async (userId: string, updates: any) => {
-  // In a real app, this would update the database
-  return { ...updates, id: userId };
+  try {
+    // Update user in Supabase
+    const { data, error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    // Fallback to in-memory update if database fails
+    return { ...updates, id: userId };
+  }
 };
 
 export const createGig = async (gigData: any) => {

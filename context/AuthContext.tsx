@@ -26,12 +26,14 @@ interface AuthContextType {
   isEmailVerified: boolean;
   isLoading: boolean;
   error: string | null;
+  profileCompleted: boolean;
   login: (userData: any) => void;
   logout: () => void;
   updateUserRole: (role: "freelancer" | "client") => void;
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
   refreshUser: () => Promise<void>;
   clearError: () => void;
+  setProfileCompleted: (completed: boolean) => void;
 }
 
 const defaultPreferences: UserPreferences = {
@@ -59,6 +61,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileCompleted, setProfileCompleted] = useState(false);
 
   // Load user preferences and role from localStorage or API
   useEffect(() => {
@@ -69,6 +72,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           const savedRole = localStorage.getItem(`userRole_${user.id}`);
           const savedPreferences = localStorage.getItem(
             `userPreferences_${user.id}`,
+          );
+          const savedProfileCompleted = localStorage.getItem(
+            `profileCompleted_${user.id}`,
           );
 
           if (savedRole) {
@@ -83,6 +89,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
               ...defaultPreferences,
               ...JSON.parse(savedPreferences),
             });
+          }
+
+          if (savedProfileCompleted) {
+            setProfileCompleted(savedProfileCompleted === "true");
+          } else {
+            // New users haven't completed their profile
+            setProfileCompleted(false);
           }
 
           // Upsert user to Supabase
@@ -186,6 +199,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setError(null);
   };
 
+  const handleSetProfileCompleted = (completed: boolean) => {
+    setProfileCompleted(completed);
+    if (user) {
+      localStorage.setItem(`profileCompleted_${user.id}`, String(completed));
+    }
+  };
+
   const isEmailVerified =
     user?.emailAddresses?.[0]?.verification?.status === "verified";
 
@@ -206,12 +226,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         isEmailVerified,
         isLoading,
         error,
+        profileCompleted,
         login,
         logout,
         updateUserRole,
         updateUserPreferences,
         refreshUser,
         clearError,
+        setProfileCompleted: handleSetProfileCompleted,
       }}
     >
       {children}
