@@ -17,42 +17,61 @@ interface GigCardProps {
 
 const GigCard: React.FC<GigCardProps> = ({ gig }) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border border-green-200">
+    <div className="card group">
       <div className="p-6">
+        {/* User Info */}
         <div className="flex items-center mb-4">
-          <img
-            src={gig.userAvatar}
-            alt={gig.userName}
-            className="w-12 h-12 rounded-full mr-4 border-2 border-green-200"
-          />
+          <div className="relative">
+            <img
+              src={gig.userAvatar}
+              alt={gig.userName}
+              className="w-12 h-12 rounded-full mr-4 border-2 border-blue-600 group-hover:border-green-600 transition-all duration-300"
+            />
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+          </div>
           <div>
-            <h3 className="text-lg font-semibold text-green-800">
+            <h3 className="text-lg font-semibold text-text-gray-900 group-hover:text-gray-900-color transition-all duration-200">
               {gig.title}
             </h3>
-            <p className="text-sm text-green-600">by {gig.userName}</p>
+            <p className="text-sm text-text-gray-600">by {gig.userName}</p>
           </div>
         </div>
-        <p className="text-gray-700 mb-4 line-clamp-3">{gig.description}</p>
-        <div className="flex items-center justify-between">
+
+        {/* Description */}
+        <p className="text-text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+          {gig.description}
+        </p>
+
+        {/* Category Badge */}
+        <div className="mb-4">
+          <span className="inline-block px-3 py-1 bg-bg-gray-100 text-text-gray-600 text-xs font-medium rounded-full">
+            {gig.category}
+          </span>
+        </div>
+
+        {/* Price and Rating */}
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <span className="text-green-600 font-bold text-xl">
+            <span className="text-gray-900-color font-bold text-xl">
               ${gig.price}
             </span>
           </div>
           <div className="flex items-center">
             <span className="text-yellow-500">★</span>
-            <span className="ml-1 text-gray-700">{gig.rating}</span>
-            <span className="ml-1 text-gray-500">({gig.reviews})</span>
+            <span className="ml-1 text-text-gray-900 font-medium">
+              {gig.rating}
+            </span>
+            <span className="ml-1 text-text-gray-600">({gig.reviews})</span>
           </div>
         </div>
-        <div className="mt-4">
-          <Link
-            href={`/gigs/${gig.id}`}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 text-center block transition-all duration-200 hover:scale-105 shadow-md"
-          >
-            View Details
-          </Link>
-        </div>
+
+        {/* Action Button */}
+        <Link
+          href={`/gigs/${gig.id}`}
+          className="w-full btn-primary py-3 px-4 text-center block text-sm font-semibold"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );
