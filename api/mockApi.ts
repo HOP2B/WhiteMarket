@@ -6,7 +6,8 @@ export const getGigs = async () => {
     .select(
       `
       *,
-      user:users!user_id(name, avatar)
+      user:users!user_id(name, avatar),
+      reviews:reviews(rating)
     `,
     )
     .order("id", { ascending: false });
@@ -14,29 +15,43 @@ export const getGigs = async () => {
   if (error) {
     throw error;
   }
-  return data.map((gig) => ({
-    ...gig,
-    userName: gig.user?.name || "Unknown",
-    userAvatar: gig.user?.avatar || "/default-avatar.jpg",
-    userId: gig.user_id,
-  }));
+  return data.map((gig) => {
+    const reviews = gig.reviews || [];
+    const rating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
+    return {
+      ...gig,
+      userName: gig.user?.name || "Unknown",
+      userAvatar: gig.user?.avatar || "/default-avatar.jpg",
+      userId: gig.user_id,
+      rating: Math.round(rating * 10) / 10, // round to 1 decimal
+      reviews: reviews.length,
+    };
+  });
 };
 
 export const getGigById = async (id: string) => {
   const { data, error } = await supabase
     .from("gigs")
-    .select("*")
+    .select(`
+      *,
+      user:users!user_id(name, avatar),
+      reviews:reviews(rating)
+    `)
     .eq("id", id)
     .single();
 
   if (error) {
     throw error;
   }
+  const reviews = data.reviews || [];
+  const rating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
   return {
     ...data,
-    userName: "Unknown",
-    userAvatar: "/default-avatar.jpg",
+    userName: data.user?.name || "Unknown",
+    userAvatar: data.user?.avatar || "/default-avatar.jpg",
     userId: data.user_id,
+    rating: Math.round(rating * 10) / 10,
+    reviews: reviews.length,
   };
 };
 
@@ -328,7 +343,8 @@ export const removeFromFavorites = async (userId: string, gigId: string) => {
 export const searchGigs = async (query: string, filters: any = {}) => {
   let queryBuilder = supabase.from("gigs").select(`
       *,
-      user:users!user_id(name, avatar)
+      user:users!user_id(name, avatar),
+      reviews:reviews(rating)
     `);
 
   // Text search
@@ -384,12 +400,18 @@ export const searchGigs = async (query: string, filters: any = {}) => {
   if (error) {
     throw error;
   }
-  return data.map((gig) => ({
-    ...gig,
-    userName: gig.user?.name || "Unknown",
-    userAvatar: gig.user?.avatar || "/default-avatar.jpg",
-    userId: gig.user_id,
-  }));
+  return data.map((gig) => {
+    const reviews = gig.reviews || [];
+    const rating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
+    return {
+      ...gig,
+      userName: gig.user?.name || "Unknown",
+      userAvatar: gig.user?.avatar || "/default-avatar.jpg",
+      userId: gig.user_id,
+      rating: Math.round(rating * 10) / 10, // round to 1 decimal
+      reviews: reviews.length,
+    };
+  });
 };
 
 export const getCategories = async () => {
