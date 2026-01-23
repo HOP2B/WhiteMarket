@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../components/Navbar";
-import { getGigById, getUserById, getGigs } from "../../api/mockApi";
+import {
+  getGigById,
+  getUserById,
+  getGigs,
+  getReviews,
+  createReview,
+} from "../../api/mockApi";
 import { useAuth } from "../../context/AuthContext";
 
 interface Package {
@@ -35,6 +41,12 @@ const GigDetail: React.FC = () => {
   const [relatedGigs, setRelatedGigs] = useState<any[]>([]);
   const [isFavorited, setIsFavorited] = useState(false);
   const [shared, setShared] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   // Mock packages data
   const packages: Package[] = [
@@ -67,30 +79,6 @@ const GigDetail: React.FC = () => {
       ],
       deliveryTime: "7 өдөр",
       revisions: "Хязгааргүй",
-    },
-  ];
-
-  // Mock reviews data
-  const reviews: Review[] = [
-    {
-      id: "1",
-      userId: "user1",
-      userName: "Бат-Эрдэнэ",
-      userAvatar: "/avatars/user1.jpg",
-      rating: 5,
-      comment:
-        "Маш сайхан ажил хийлээ. Цаг хугацаандаа хүргэж өглөө. Дахин захиалах болно.",
-      date: "2024-01-15",
-    },
-    {
-      id: "2",
-      userId: "user2",
-      userName: "Сараа",
-      userAvatar: "/avatars/user2.jpg",
-      rating: 4,
-      comment:
-        "Сайхан ажил болсон. Зарим зүйлийг өөрчлөхөд түргэн хариу өгсөн.",
-      date: "2024-01-10",
     },
   ];
 
@@ -161,6 +149,54 @@ const GigDetail: React.FC = () => {
     router.push(`/checkout?gigId=${gig.id}&package=${packageName}`);
   };
 
+  const handleSubmitReview = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    if (!reviewComment.trim()) {
+      alert("Сэтгэгдэл бичих шаардлагатай");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const reviewData = {
+        gig_id: id as string,
+        user_id: user.id,
+        rating: reviewRating,
+        comment: reviewComment,
+        created_at: new Date().toISOString(),
+      };
+
+      await createReview(reviewData);
+
+      // Refresh reviews
+      setReviewsLoading(true);
+      try {
+        const updatedReviews = await getReviews(id as string);
+        setReviews(updatedReviews);
+      } catch (error) {
+        console.error("Error refreshing reviews:", error);
+      } finally {
+        setReviewsLoading(false);
+      }
+
+      // Reset form
+      setReviewComment("");
+      setReviewRating(5);
+      setShowReviewForm(false);
+
+      alert("Сэтгэгдэл амжилттай илгээгдлээ!");
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Сэтгэгдэл илгээхэд алдаа гарлаа");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       const fetchGigData = async () => {
@@ -180,6 +216,18 @@ const GigDetail: React.FC = () => {
               )
               .slice(0, 4);
             setRelatedGigs(related);
+
+            // Fetch reviews
+            setReviewsLoading(true);
+            try {
+              const reviewsData = await getReviews(id as string);
+              setReviews(reviewsData);
+            } catch (error) {
+              console.error("Error fetching reviews:", error);
+              setReviews([]);
+            } finally {
+              setReviewsLoading(false);
+            }
           }
           setLoading(false);
         } catch (error) {
@@ -395,56 +443,128 @@ const GigDetail: React.FC = () => {
 
                   {activeTab === "reviews" && (
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-6">
-                        Хэрэглэгчдийн сэтгэгдэл
-                      </h3>
-                      <div className="space-y-6">
-                        {reviews.map((review) => (
-                          <div
-                            key={review.id}
-                            className="border-b border-gray-200 pb-6"
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Хэрэглэгчдийн сэтгэгдэл
+                        </h3>
+                        {user && (
+                          <button
+                            onClick={() => setShowReviewForm(!showReviewForm)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                           >
-                            <div className="flex items-start space-x-4">
-                              <img
-                                src={review.userAvatar}
-                                alt={review.userName}
-                                className="w-10 h-10 rounded-full"
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div>
-                                    <p className="font-semibold text-gray-900">
-                                      {review.userName}
-                                    </p>
-                                    <div className="flex items-center">
-                                      {[...Array(5)].map((_, i) => (
-                                        <span
-                                          key={i}
-                                          className={`text-sm ${
-                                            i < review.rating
-                                              ? "text-yellow-500"
-                                              : "text-gray-300"
-                                          }`}
-                                        >
-                                          ★
-                                        </span>
-                                      ))}
-                                      <span className="ml-2 text-sm text-gray-500">
-                                        {new Date(
-                                          review.date,
-                                        ).toLocaleDateString("mn-MN")}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <p className="text-gray-700">
-                                  {review.comment}
-                                </p>
-                              </div>
+                            {showReviewForm ? "Болих" : "Сэтгэгдэл бичих"}
+                          </button>
+                        )}
+                      </div>
+
+                      {showReviewForm && (
+                        <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                          <h4 className="font-semibold text-gray-900 mb-4">
+                            Сэтгэгдэл бичих
+                          </h4>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Үнэлгээ
+                            </label>
+                            <div className="flex space-x-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  onClick={() => setReviewRating(star)}
+                                  className={`text-2xl ${
+                                    star <= reviewRating
+                                      ? "text-yellow-500"
+                                      : "text-gray-300"
+                                  }`}
+                                >
+                                  ★
+                                </button>
+                              ))}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Сэтгэгдэл
+                            </label>
+                            <textarea
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                              rows={4}
+                              placeholder="Сэтгэгдлээ бичнэ үү..."
+                            />
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={handleSubmitReview}
+                              disabled={submittingReview}
+                              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                            >
+                              {submittingReview ? "Илгээж байна..." : "Илгээх"}
+                            </button>
+                            <button
+                              onClick={() => setShowReviewForm(false)}
+                              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                            >
+                              Болих
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {reviewsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          {reviews.map((review) => (
+                            <div
+                              key={review.id}
+                              className="border-b border-gray-200 pb-6"
+                            >
+                              <div className="flex items-start space-x-4">
+                                <img
+                                  src={review.userAvatar}
+                                  alt={review.userName}
+                                  className="w-10 h-10 rounded-full"
+                                />
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                      <p className="font-semibold text-gray-900">
+                                        {review.userName}
+                                      </p>
+                                      <div className="flex items-center">
+                                        {[...Array(5)].map((_, i) => (
+                                          <span
+                                            key={i}
+                                            className={`text-sm ${
+                                              i < review.rating
+                                                ? "text-yellow-500"
+                                                : "text-gray-300"
+                                            }`}
+                                          >
+                                            ★
+                                          </span>
+                                        ))}
+                                        <span className="ml-2 text-sm text-gray-500">
+                                          {new Date(
+                                            review.date,
+                                          ).toLocaleDateString("mn-MN")}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <p className="text-gray-700">
+                                    {review.comment}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

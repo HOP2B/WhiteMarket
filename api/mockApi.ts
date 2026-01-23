@@ -12,10 +12,8 @@ export const getGigs = async () => {
     .order("id", { ascending: false });
 
   if (error) {
-    console.error("Error fetching gigs:", error);
     throw error;
   }
-  console.log("Fetched gigs:", data);
   return data.map((gig) => ({
     ...gig,
     userName: gig.user?.name || "Unknown",
@@ -25,7 +23,6 @@ export const getGigs = async () => {
 };
 
 export const getGigById = async (id: string) => {
-  console.log("getGigById called with id:", id);
   const { data, error } = await supabase
     .from("gigs")
     .select("*")
@@ -33,10 +30,8 @@ export const getGigById = async (id: string) => {
     .single();
 
   if (error) {
-    console.error("Error fetching gig:", error);
     throw error;
   }
-  console.log("Fetched gig:", data);
   return {
     ...data,
     userName: "Unknown",
@@ -46,7 +41,6 @@ export const getGigById = async (id: string) => {
 };
 
 export const getUserById = async (id: string) => {
-  console.log("getUserById called with id:", id);
   const { data, error } = await supabase
     .from("users")
     .select("*")
@@ -54,7 +48,6 @@ export const getUserById = async (id: string) => {
     .single();
 
   if (error) {
-    console.error("Error fetching user:", error);
     // If user not found in database, return a default user
     // This handles cases where user signed up but no record in users table
     return {
@@ -66,7 +59,6 @@ export const getUserById = async (id: string) => {
       skills: [],
     };
   }
-  console.log("Fetched user:", data);
   return data;
 };
 
@@ -147,7 +139,6 @@ export const markMessagesAsRead = async (messageIds: string[]) => {
 
 export const createOrder = async (order: any) => {
   // Simulate order creation (database not set up yet)
-  console.log("Simulating order creation:", order);
   return { ...order, id: Date.now().toString() };
 };
 
@@ -189,9 +180,13 @@ export const getReviews = async (gigId: string) => {
       user:users(name, avatar)
     `,
     )
-    .eq("gig_id", gigId);
+    .eq("gig_id", gigId)
+    .order("date", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
+
   return data.map((review) => ({
     ...review,
     userName: review.user?.name || "Unknown",
@@ -199,19 +194,51 @@ export const getReviews = async (gigId: string) => {
   }));
 };
 
+export const getAllReviews = async (limit: number = 10) => {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      `
+      *,
+      user:users(name, avatar),
+      gig:gigs(title)
+    `,
+    )
+    .order("date", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return data.map((review) => ({
+    ...review,
+    userName: review.user?.name || "Unknown",
+    userAvatar: review.user?.avatar || "/default-avatar.jpg",
+    gigTitle: review.gig?.title || "Unknown Gig",
+  }));
+};
+
 export const createReview = async (review: any) => {
   const newReview = {
-    ...review,
     id: Date.now().toString(),
+    gig_id: review.gig_id,
+    user_id: review.user_id,
+    rating: review.rating,
+    comment: review.comment,
     date: new Date().toISOString().split("T")[0],
   };
+
   const { data, error } = await supabase
     .from("reviews")
     .insert(newReview)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
+
   return data;
 };
 
@@ -237,7 +264,7 @@ export const getNotifications = async (userId: string) => {
     .from("notifications")
     .select("*")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("date", { ascending: false });
 
   if (error) throw error;
   return data;
@@ -355,10 +382,8 @@ export const searchGigs = async (query: string, filters: any = {}) => {
   const { data, error } = await queryBuilder;
 
   if (error) {
-    console.error("Error fetching gigs:", error);
     throw error;
   }
-  console.log("Fetched gigs:", data);
   return data.map((gig) => ({
     ...gig,
     userName: gig.user?.name || "Unknown",
@@ -410,7 +435,6 @@ export const getUserStats = async (userId: string) => {
 
 export const updateUserProfile = async (userId: string, updates: any) => {
   // In a real app, this would update the database
-  console.log("Updating user profile:", userId, updates);
   return { ...updates, id: userId };
 };
 
