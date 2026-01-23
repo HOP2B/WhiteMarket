@@ -3,7 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/jobs": "pages/jobs.js",
-  "/": "pages/index.js",
-  "/checkout": "pages/checkout.js",
-  "/gigs/[id]": "pages/gigs/[id].js"
+  "/": "pages/index.js"
 }

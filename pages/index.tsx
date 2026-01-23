@@ -4,26 +4,31 @@ import Navbar from "../components/Navbar";
 import {
   getFeaturedJobs,
   getJobCategories,
-  getTestimonials,
+  getAllReviews,
+  getUserStats,
 } from "../api/mockApi";
 
 const Home: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [userStats, setUserStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [jobsData, categoriesData, testimonialsData] = await Promise.all([
+        const [jobsData, categoriesData, reviewsData] = await Promise.all([
           getFeaturedJobs(),
           getJobCategories(),
-          getTestimonials(),
+          getAllReviews(3), // Get 3 recent reviews for testimonials
         ]);
         setJobs(jobsData);
+        setFilteredJobs(jobsData);
         setCategories(categoriesData);
-        setTestimonials(testimonialsData);
+        setReviews(reviewsData);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -116,9 +121,11 @@ const Home: React.FC = () => {
                       ₮{job.budget.toLocaleString()}
                     </span>
                   </div>
-                  <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                    View Job
-                  </button>
+                  <Link href={`/gigs/${job.id}`}>
+                    <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+                      View Job
+                    </button>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -191,27 +198,27 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial: any) => (
+            {reviews.map((review: any) => (
               <div
-                key={testimonial.id}
+                key={review.id}
                 className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
               >
                 <div className="flex items-center mb-4">
                   <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
+                    src={review.userAvatar}
+                    alt={review.userName}
                     className="w-12 h-12 rounded-full mr-4"
                   />
                   <div>
                     <h4 className="font-semibold text-gray-900">
-                      {testimonial.name}
+                      {review.userName}
                     </h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <p className="text-sm text-gray-600">{review.gigTitle}</p>
                   </div>
                 </div>
-                <p className="text-gray-600 mb-4">"{testimonial.review}"</p>
+                <p className="text-gray-600 mb-4">"{review.comment}"</p>
                 <div className="flex text-yellow-400">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[...Array(review.rating)].map((_, i) => (
                     <span key={i}>★</span>
                   ))}
                 </div>
