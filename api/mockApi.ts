@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabase, getCurrentUserId } from "../lib/supabase";
 
 export const getGigs = async () => {
   const { data, error } = await supabase
@@ -107,14 +107,23 @@ export const getMessages = async (userId: string) => {
 export const sendMessage = async (message: any) => {
   let fileUrl = null;
   if (message.file) {
-    // Upload to Supabase Storage
-    const fileExt = message.file.name.split('.').pop();
+    // Only attempt storage uploads in the browser (client-side).
+    // During server-side rendering there is no authenticated session/token
+    // attached to the anon client and uploads will fail with RLS/StorageApiError.
+    if (typeof window === "undefined") {
+      throw new Error(
+        "File uploads must be performed client-side or via a server endpoint that uses the service_role key."
+      );
+    }
+
+    // Upload to Supabase Storage (client-side)
+    const fileExt = message.file.name.split(".").pop();
     const fileName = `message-files/${Date.now()}.${fileExt}`;
     const { data, error } = await supabase.storage
-      .from('message-files')
+      .from("message-files")
       .upload(fileName, message.file);
     if (error) throw error;
-    fileUrl = supabase.storage.from('message-files').getPublicUrl(fileName).data.publicUrl;
+    fileUrl = supabase.storage.from("message-files").getPublicUrl(fileName).data.publicUrl;
   }
 
   const dbMessage = {
@@ -125,6 +134,13 @@ export const sendMessage = async (message: any) => {
     timestamp: message.timestamp,
     file_url: fileUrl, // Assuming you add this column
   };
+
+  // Ensure sender_id is the currently authenticated user (or provided)
+  if (!dbMessage.sender_id) {
+    const uid = await getCurrentUserId();
+    if (!uid) throw new Error("Not authenticated");
+    dbMessage.sender_id = uid;
+  }
 
   const { data, error } = await supabase
     .from("messages")
@@ -255,7 +271,12 @@ export const createReview = async (review: any) => {
     comment: review.comment,
     date: new Date().toISOString().split("T")[0],
   };
-
+  // If user_id not provided, use current authenticated user
+  if (!newReview.user_id) {
+    const uid = await getCurrentUserId();
+    if (!uid) throw new Error("Not authenticated");
+    newReview.user_id = uid;
+  }
   const { data, error } = await supabase
     .from("reviews")
     .insert(newReview)
@@ -270,10 +291,18 @@ export const createReview = async (review: any) => {
 };
 
 export const createNotification = async (notification: any) => {
+  // Ensure we have a target user id
+  let targetUserId = notification.userId;
+  if (!targetUserId) {
+    const uid = await getCurrentUserId();
+    if (!uid) throw new Error("Not authenticated");
+    targetUserId = uid;
+  }
+
   const { data, error } = await supabase
     .from("notifications")
     .insert({
-      user_id: notification.userId,
+      user_id: targetUserId,
       type: notification.type,
       title: notification.title,
       message: notification.message,
@@ -325,9 +354,15 @@ export const getFavorites = async (userId: string) => {
 };
 
 export const addToFavorites = async (userId: string, gigId: string) => {
+  let uid = userId;
+  if (!uid) {
+    uid = await getCurrentUserId();
+    if (!uid) throw new Error("Not authenticated");
+  }
+
   const newFavorite = {
     id: Date.now().toString(),
-    user_id: userId,
+    user_id: uid,
     gig_id: gigId,
     created_at: new Date().toISOString(),
   };
@@ -503,22 +538,29 @@ export const createGig = async (gigData: any) => {
     userAvatar,
   } = gigData;
 
+  // Prefer authenticated user id where available
+  let uid = userId;
+  if (!uid) {
+    uid = await getCurrentUserId();
+    if (!uid) throw new Error("Not authenticated");
+  }
+
   // Ensure user exists in users table
   const { data: existingUser } = await supabase
     .from("users")
     .select("*")
-    .eq("id", userId)
+    .eq("id", uid)
     .single();
 
   if (!existingUser) {
     await supabase
       .from("users")
-      .insert({ id: userId, name: userName, email: "", avatar: userAvatar });
+      .insert({ id: uid, name: userName, email: "", avatar: userAvatar });
   }
 
   const newGig = {
     id: Date.now().toString(),
-    user_id: userId,
+    user_id: uid,
     title,
     description,
     price,
