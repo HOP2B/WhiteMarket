@@ -13,9 +13,9 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 lg:grid lg:grid-cols-3 lg:items-center">
-          {/* Logo Section */}
-          <div className="flex items-center">
+        <div className="flex justify-between h-16 lg:grid lg:grid-cols-12 lg:items-center">
+          {/* Logo Section - 2 columns */}
+          <div className="flex items-center lg:col-span-2">
             <Link href="/" className="flex items-center">
               <span className="text-2xl font-bold text-gradient">
                 White Market
@@ -23,19 +23,18 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Search and Navigation */}
-          <div className="flex items-center space-x-4">
-            {/* Search Bar */}
-            <div className="flex items-center hidden md:block">
-              <div className="relative">
+          {/* Search Bar - 8 columns */}
+          <div className="flex items-center lg:col-span-8">
+            <div className="flex items-center hidden md:block w-full">
+              <div className="relative w-full">
                 <input
                   type="text"
                   placeholder="Search services..."
-                  className="input-field pl-10 pr-4 py-2 w-64"
+                  className="w-full pl-14 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-text-gray-600"
+                    className="h-6 w-6 text-text-gray-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -50,7 +49,10 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
 
+          {/* Navigation - 2 columns */}
+          <div className="flex items-center space-x-4 lg:col-span-2 justify-end">
             {/* Desktop Navigation */}
             {user ? (
               <div className="flex items-center space-x-1">

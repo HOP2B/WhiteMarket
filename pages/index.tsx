@@ -97,11 +97,11 @@ const Home: React.FC = () => {
                   placeholder="Job title, keyword, location…"
                   value={searchQuery}
                   onChange={handleSearch}
-                  className="w-full input-field pl-10 pr-4 py-4 text-gray-900"
+                  className="w-full pl-14 pr-4 py-4 text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-gray-600"
+                    className="h-6 w-6 text-gray-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

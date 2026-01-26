@@ -156,17 +156,17 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center mb-6">
                 <img
                   src={
-                    user.avatar ||
+                    user.imageUrl ||
                     "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFNUU3RUIiLz4KPHBhdGggZD0iTTIwIDIwQzIyLjc2MTQgMjAgMjUgMTcuNzYxNCAyNSAxNUMyNSAxMi4yMzg2IDIyLjc2MTQgMTAgMjAgMTBDMTcuMjM4NiAxMCAxNSAxMi4yMzg2IDE1IDE1QzE1IDE3Ljc2MTQgMTcuNzYxNCAyMCAyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTMwIDI4QzMwIDI0LjY4NjMgMjYuNDI3MSAyMiAyMiAyMkgxOEMxMy41NzI5IDIyIDEwIDI0LjY4NjMgMTAgMjhWMzBIMzBWMjhaIiBmaWxsPSIjOUNBNEFGIi8+Cjwvc3ZnPgo="
                   }
-                  alt={user.name}
+                  alt={user.fullName || user.username || "User"}
                   className="w-16 h-16 rounded-full mr-4"
                 />
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">
-                    {user.name}
+                    {user.fullName || user.username || "Unknown User"}
                   </h2>
-                  <p className="text-gray-600">{user.email}</p>
+                  <p className="text-gray-600">{user.emailAddresses?.[0]?.emailAddress || "No email"}</p>
                 </div>
               </div>
 

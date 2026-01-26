@@ -10,6 +10,10 @@ const EditProfileModal: React.FC<{
   onSave: (updatedUser: any) => void;
 }> = ({ user, onClose, onSave }) => {
   const [activeTab, setActiveTab] = useState("basic");
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [cvPreview, setCvPreview] = useState<string | null>(
+    user?.cv?.url || null,
+  );
   const [formData, setFormData] = useState({
     name: user?.name || "",
     bio: user?.bio || "",
@@ -20,10 +24,11 @@ const EditProfileModal: React.FC<{
     website: user?.website || "",
     linkedin: user?.linkedin || "",
     github: user?.github || "",
-    portfolio: user?.portfolio || [],
+    portfolio: user?.portfolio || "",
     experience: user?.experience || "",
     education: user?.education || "",
     certifications: user?.certifications || "",
+    customFields: user?.customFields || "",
   });
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -38,6 +43,16 @@ const EditProfileModal: React.FC<{
         setFormData({ ...formData, avatar: e.target?.result as string });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCvFile(file);
+      // Create a preview URL for the uploaded file
+      const previewUrl = URL.createObjectURL(file);
+      setCvPreview(previewUrl);
     }
   };
 
@@ -58,6 +73,15 @@ const EditProfileModal: React.FC<{
       experience: formData.experience,
       education: formData.education,
       certifications: formData.certifications,
+      customFields: formData.customFields,
+      cv: cvFile
+        ? {
+            name: cvFile.name,
+            size: cvFile.size,
+            type: cvFile.type,
+            url: cvPreview,
+          }
+        : user?.cv || null,
     };
     onSave(updatedUser);
     onClose();
