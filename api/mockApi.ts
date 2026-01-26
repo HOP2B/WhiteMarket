@@ -186,31 +186,23 @@ export const createOrder = async (order: any) => {
 };
 
 export const getOrders = async (userId: string) => {
-  // Return mock orders for development
-  return [
-    {
-      id: "1",
-      gig_id: "1",
-      buyer_id: userId,
-      seller_id: "user1",
-      amount: 50000,
-      status: "completed",
-      created_at: "2024-01-15T10:00:00Z",
-      gigs: { title: "Logo Design", price: 50000, user_id: "user1" },
-      users: { name: "John Doe", avatar: "/avatars/john-doe.jpg" },
-    },
-    {
-      id: "2",
-      gig_id: "2",
-      buyer_id: userId,
-      seller_id: "user2",
-      amount: 75000,
-      status: "in_progress",
-      created_at: "2024-01-18T14:30:00Z",
-      gigs: { title: "Web Development", price: 75000, user_id: "user2" },
-      users: { name: "Jane Smith", avatar: "/avatars/jane-smith.jpg" },
-    },
-  ];
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      *,
+      gigs:gigs(title, price, user_id),
+      users:users(name, avatar)
+    `,
+    )
+    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 };
 
 // New API functions for enhanced functionality
@@ -419,6 +411,14 @@ export const searchGigs = async (query: string, filters: any = {}) => {
     queryBuilder = queryBuilder.gte("rating", filters.minRating);
   }
 
+  // Location filter (if location is provided)
+  if (filters.location) {
+    const { lat, lng } = filters.location;
+    // For now, we'll just filter by gigs that have location information
+    // In a real app, you would use a spatial query with PostGIS
+    queryBuilder = queryBuilder.not("location", "is", null);
+  }
+
   // Sort
   if (filters.sortBy) {
     switch (filters.sortBy) {
@@ -433,6 +433,15 @@ export const searchGigs = async (query: string, filters: any = {}) => {
         break;
       case "newest":
         queryBuilder = queryBuilder.order("created_at", { ascending: false });
+        break;
+      case "distance":
+        // For now, default to newest if distance sorting is requested without location
+        if (filters.location) {
+          // In a real app, you would sort by distance using PostGIS
+          queryBuilder = queryBuilder.order("created_at", { ascending: false });
+        } else {
+          queryBuilder = queryBuilder.order("created_at", { ascending: false });
+        }
         break;
       default:
         queryBuilder = queryBuilder.order("created_at", { ascending: false });
