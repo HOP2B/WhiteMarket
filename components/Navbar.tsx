@@ -23,8 +23,8 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Search Bar - 8 columns */}
-          <div className="flex items-center lg:col-span-8">
+          {/* Search Bar - 5 columns */}
+          <div className="flex items-center lg:col-span-5">
             <div className="flex items-center hidden md:block w-full">
               <div className="relative w-full">
                 <input
@@ -51,75 +51,78 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation - 2 columns */}
-          <div className="flex items-center space-x-4 lg:col-span-2 justify-end">
+          {/* Navigation - 5 columns */}
+          <div className="flex items-center space-x-4 lg:col-span-5 justify-end">
             {/* Desktop Navigation */}
-            {user ? (
-              <div className="flex items-center space-x-1">
-                <Link
-                  href="/jobs"
-                  className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
-                >
-                  Үйлчилгээ
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/messages"
-                  className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
-                >
-                  Messages
-                </Link>
-
-                {/* Notification Bell */}
-                <div className="relative">
-                  <button
-                    onClick={toggleNotifications}
-                    className="relative p-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200"
-                    title="Мэдэгдэл"
+            <div className="flex items-center space-x-1">
+              <Link
+                href="/jobs"
+                className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
+              >
+                Үйлчилгээ
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
+              >
+                Dashboard
+              </Link>
+              {user && (
+                <>
+                  <Link
+                    href="/messages"
+                    className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
                   >
-                    <span className="text-xl">🔔</span>
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse-subtle">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </button>
-                  <NotificationDropdown />
-                </div>
+                    Messages
+                  </Link>
 
-                {/* User Profile */}
-                <div className="ml-4">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8 border-2 border-blue-600",
-                        userButtonTrigger: "p-1",
-                      },
-                    }}
-                  />
+                  {/* Notification Bell */}
+                  <div className="relative">
+                    <button
+                      onClick={toggleNotifications}
+                      className="relative p-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200"
+                      title="Мэдэгдэл"
+                    >
+                      <span className="text-xl">🔔</span>
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse-subtle">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    <NotificationDropdown />
+                  </div>
+
+                  {/* User Profile */}
+                  <div className="ml-4">
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-8 h-8 border-2 border-blue-600",
+                          userButtonTrigger: "p-1",
+                        },
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+              {!user && (
+                <div className="flex items-center space-x-4">
+                  <Link
+                    href="/login"
+                    className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="btn-primary px-6 py-2 text-sm"
+                  >
+                    Sign Up
+                  </Link>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-text-gray-600 hover:text-gray-900-color hover:bg-bg-gray-100 rounded-lg transition-all duration-200 font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="btn-primary px-6 py-2 text-sm"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

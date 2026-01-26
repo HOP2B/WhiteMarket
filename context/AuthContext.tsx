@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { supabase } from "../lib/supabase";
+import { getUserById } from "../api/mockApi";
 
 interface UserPreferences {
   theme: "light" | "dark";
@@ -52,8 +53,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { user, isLoaded } = useUser();
-  const { signOut, user: clerkUser } = useClerk();
+  const { user: clerkUser, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const [userRole, setUserRole] = useState<"freelancer" | "client" | null>(
     null,
   );
@@ -62,25 +63,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profileCompleted, setProfileCompleted] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   // Load user preferences and role from localStorage or API
   useEffect(() => {
-    if (user) {
+    if (clerkUser && isLoaded) {
       const loadUserData = async () => {
         try {
-          // Load from localStorage first
-          const savedRole = localStorage.getItem(`userRole_${user.id}`);
+          // Step 1: Persist user data from Clerk to database (upsert to ensure sync)
+          await supabase.from("users").upsert({
+            id: clerkUser.id,
+            name: clerkUser.fullName || clerkUser.username || "Unknown User",
+            email: clerkUser.emailAddresses[0]?.emailAddress || "",
+            avatar: clerkUser.imageUrl || "/default-avatar.jpg",
+          });
+          console.log("User upserted to Supabase");
+
+          // Step 2: Fetch user data from database
+          const userData = await getUserById(clerkUser.id);
+          setUser(userData);
+
+          // Step 3: Load from localStorage
+          const savedRole = localStorage.getItem(`userRole_${clerkUser.id}`);
           const savedPreferences = localStorage.getItem(
-            `userPreferences_${user.id}`,
+            `userPreferences_${clerkUser.id}`,
           );
           const savedProfileCompleted = localStorage.getItem(
-            `profileCompleted_${user.id}`,
+            `profileCompleted_${clerkUser.id}`,
           );
 
           if (savedRole) {
             setUserRole(savedRole as "freelancer" | "client");
           } else {
-            // If no role set, prompt user to choose
             setUserRole(null);
           }
 
@@ -94,27 +108,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           if (savedProfileCompleted) {
             setProfileCompleted(savedProfileCompleted === "true");
           } else {
-            // New users haven't completed their profile
             setProfileCompleted(false);
           }
-
-          // Upsert user to Supabase
-          try {
-            await supabase.from("users").upsert({
-              id: user.id,
-              name: user.username || user.fullName || "Unknown User",
-              email: user.emailAddresses[0]?.emailAddress || "",
-              avatar: user.imageUrl || "/default-avatar.jpg",
-            });
-            console.log("User upserted to Supabase");
-          } catch (err) {
-            console.error("Error upserting user to Supabase:", err);
-          }
-
-          // In a real app, you might fetch additional user data from your API here
-          // const userData = await getUserById(user.id);
-          // setUserRole(userData.role);
-          // setUserPreferences(userData.preferences);
         } catch (err) {
           console.error("Error loading user data:", err);
           setError("Failed to load user data");
@@ -124,10 +119,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       };
 
       loadUserData();
-    } else {
+    } else if (isLoaded) {
+      // User is not authenticated
+      setUser(null);
       setIsLoading(false);
     }
-  }, [user]);
+  }, [clerkUser, isLoaded]);
 
   const login = (userData: any) => {
     // Not needed with Clerk, but can be used for additional logic
@@ -141,8 +138,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       // Clear local data
       setUserRole(null);
       setUserPreferences(defaultPreferences);
-      localStorage.removeItem(`userRole_${user?.id}`);
-      localStorage.removeItem(`userPreferences_${user?.id}`);
+      if (clerkUser) {
+        localStorage.removeItem(`userRole_${clerkUser.id}`);
+        localStorage.removeItem(`userPreferences_${clerkUser.id}`);
+        localStorage.removeItem(`profileCompleted_${clerkUser.id}`);
+      }
+      setUser(null);
     } catch (err) {
       console.error("Error during logout:", err);
       setError("Failed to logout");
@@ -152,10 +153,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const updateUserRole = async (role: "freelancer" | "client") => {
     try {
       setUserRole(role);
-      if (user) {
-        localStorage.setItem(`userRole_${user.id}`, role);
+      if (clerkUser) {
+        localStorage.setItem(`userRole_${clerkUser.id}`, role);
         // In a real app, update this in your database
-        // await updateUserRole(user.id, role);
+        // await updateUserRole(clerkUser.id, role);
       }
     } catch (err) {
       console.error("Error updating user role:", err);
@@ -169,13 +170,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const updatedPreferences = { ...userPreferences, ...preferences };
       setUserPreferences(updatedPreferences);
-      if (user) {
+      if (clerkUser) {
         localStorage.setItem(
-          `userPreferences_${user.id}`,
+          `userPreferences_${clerkUser.id}`,
           JSON.stringify(updatedPreferences),
         );
         // In a real app, update this in your database
-        // await updateUserPreferences(user.id, updatedPreferences);
+        // await updateUserPreferences(clerkUser.id, updatedPreferences);
       }
     } catch (err) {
       console.error("Error updating user preferences:", err);
@@ -185,10 +186,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const refreshUser = async () => {
     try {
-      // In a real app, refetch user data from API
-      // const freshUserData = await getUserById(user.id);
-      // Update local state with fresh data
-      console.log("User data refreshed");
+      if (clerkUser) {
+        // Fetch fresh user data from database
+        const freshUserData = await getUserById(clerkUser.id);
+        setUser(freshUserData);
+        console.log("User data refreshed");
+      }
     } catch (err) {
       console.error("Error refreshing user:", err);
       setError("Failed to refresh user data");
@@ -201,13 +204,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const handleSetProfileCompleted = (completed: boolean) => {
     setProfileCompleted(completed);
-    if (user) {
-      localStorage.setItem(`profileCompleted_${user.id}`, String(completed));
+    if (clerkUser) {
+      localStorage.setItem(
+        `profileCompleted_${clerkUser.id}`,
+        String(completed),
+      );
     }
   };
 
   const isEmailVerified =
-    user?.emailAddresses?.[0]?.verification?.status === "verified";
+    clerkUser?.emailAddresses?.[0]?.verification?.status === "verified";
 
   if (!isLoaded || isLoading) {
     return (

@@ -14,6 +14,7 @@ interface Gig {
   userName: string;
   userAvatar: string;
   userId: string;
+  location?: string;
 }
 
 interface Category {
@@ -31,6 +32,33 @@ const Jobs: React.FC = () => {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [sortBy, setSortBy] = useState("newest");
   const [minRating, setMinRating] = useState("");
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const getUserLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setLocationError(
+            "Unable to get your location. Please enable location services.",
+          );
+        },
+      );
+    } else {
+      setLocationError("Geolocation is not supported by your browser.");
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -49,6 +77,7 @@ const Jobs: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    getUserLocation();
   }, []);
 
   // Refresh data when component mounts (useful when returning from other pages)
@@ -70,6 +99,7 @@ const Jobs: React.FC = () => {
         maxPrice: priceRange.max ? parseInt(priceRange.max) : undefined,
         minRating: minRating ? parseInt(minRating) : undefined,
         sortBy,
+        location: userLocation,
       };
 
       const results = await searchGigs(searchQuery, filters);
