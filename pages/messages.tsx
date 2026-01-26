@@ -19,12 +19,7 @@ interface Message {
   content: string;
   timestamp: string;
   status: "sent" | "delivered" | "read";
-  file?: {
-    name: string;
-    size: number;
-    type: string;
-    url: string;
-  };
+  file_url?: string;
 }
 
 interface UserStatus {
@@ -110,7 +105,7 @@ const Messages: React.FC = () => {
               content: dbMessage.content,
               timestamp: dbMessage.timestamp,
               status: dbMessage.status || "sent",
-              file: dbMessage.file,
+              file_url: dbMessage.file_url,
             };
             if (
               newMessage.senderId === user.id ||
@@ -174,24 +169,15 @@ const Messages: React.FC = () => {
       return;
 
     try {
-      const message: Message = {
+      const message: any = {
         id: Date.now().toString(),
         senderId: user.id,
         receiverId: selectedConversation,
-        content: newMessage,
+        content: selectedFile ? `Sent a file: ${selectedFile.name}` : newMessage,
         timestamp: new Date().toISOString(),
         status: "sent",
+        file: selectedFile,
       };
-
-      if (selectedFile) {
-        // Simulate file upload
-        message.file = {
-          name: selectedFile.name,
-          size: selectedFile.size,
-          type: selectedFile.type,
-          url: URL.createObjectURL(selectedFile), // In production, this would be uploaded to cloud storage
-        };
-      }
 
       const sentMessage = await sendMessage(message);
       setMessages([...messages, sentMessage]);
@@ -500,29 +486,35 @@ const Messages: React.FC = () => {
                               : "bg-white text-gray-900 border border-blue-200"
                           }`}
                         >
-                          {message.file && (
+                          {message.file_url && (
                             <div className="mb-2">
-                              <div className="bg-black bg-opacity-20 rounded p-2">
-                                <div className="flex items-center">
-                                  <span className="text-xs mr-2">📎</span>
-                                  <div>
-                                    <p className="text-xs font-medium">
-                                      {message.file.name}
-                                    </p>
-                                    <p className="text-xs opacity-75">
-                                      {(message.file.size / 1024).toFixed(1)} KB
-                                    </p>
+                              {message.file_url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                                <img
+                                  src={message.file_url}
+                                  alt="Sent image"
+                                  className="max-w-full h-auto rounded"
+                                  style={{ maxHeight: "200px" }}
+                                />
+                              ) : (
+                                <div className="bg-black bg-opacity-20 rounded p-2">
+                                  <div className="flex items-center">
+                                    <span className="text-xs mr-2">📎</span>
+                                    <div>
+                                      <p className="text-xs font-medium">
+                                        File sent
+                                      </p>
+                                      <a
+                                        href={message.file_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-blue-300 underline"
+                                      >
+                                        Download
+                                      </a>
+                                    </div>
                                   </div>
                                 </div>
-                                {message.file.type.startsWith("image/") && (
-                                  <img
-                                    src={message.file.url}
-                                    alt={message.file.name}
-                                    className="mt-2 max-w-full h-auto rounded"
-                                    style={{ maxHeight: "200px" }}
-                                  />
-                                )}
-                              </div>
+                              )}
                             </div>
                           )}
                           {message.content && (

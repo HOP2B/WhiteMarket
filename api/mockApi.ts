@@ -98,20 +98,32 @@ export const getMessages = async (userId: string) => {
     content: msg.content,
     timestamp: msg.timestamp,
     status: msg.status || "sent",
-    file: msg.file,
+    file_url: msg.file_url,
     sender: msg.sender,
     receiver: msg.receiver,
   }));
 };
 
 export const sendMessage = async (message: any) => {
+  let fileUrl = null;
+  if (message.file) {
+    // Upload to Supabase Storage
+    const fileExt = message.file.name.split('.').pop();
+    const fileName = `message-files/${Date.now()}.${fileExt}`;
+    const { data, error } = await supabase.storage
+      .from('message-files')
+      .upload(fileName, message.file);
+    if (error) throw error;
+    fileUrl = supabase.storage.from('message-files').getPublicUrl(fileName).data.publicUrl;
+  }
+
   const dbMessage = {
     id: message.id,
     sender_id: message.senderId,
     receiver_id: message.receiverId,
     content: message.content,
     timestamp: message.timestamp,
-    ...(message.file && { file: message.file }),
+    file_url: fileUrl, // Assuming you add this column
   };
 
   const { data, error } = await supabase
@@ -128,7 +140,7 @@ export const sendMessage = async (message: any) => {
     content: data.content,
     timestamp: data.timestamp,
     status: data.status || "sent",
-    file: data.file,
+    file_url: data.file_url,
   };
 };
 
