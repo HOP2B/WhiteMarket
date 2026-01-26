@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getGigs, getOrders, createGig } from "../api/mockApi";
+import { getGigs, getOrders, createGig, getUserById } from "../api/mockApi";
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profileCompleted } = useAuth();
   const router = useRouter();
   const [gigs, setGigs] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [showQuickCreate, setShowQuickCreate] = useState(false);
@@ -23,12 +24,14 @@ const Dashboard: React.FC = () => {
     if (!user) return;
 
     try {
-      const [gigsData, ordersData] = await Promise.all([
+      const [gigsData, ordersData, userData] = await Promise.all([
         getGigs(),
         getOrders(user.id),
+        getUserById(user.id),
       ]);
       setGigs(gigsData);
       setOrders(ordersData);
+      setUserProfile(userData);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -57,23 +60,29 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-2xl font-bold text-green-800 animate-fade-in">
+          <h1 className="text-2xl font-bold text-blue-800 animate-fade-in">
             Please login to view dashboard
           </h1>
         </div>
       </div>
     );
+  }
+
+  // Redirect to complete profile page if profile not completed
+  if (!profileCompleted) {
+    router.push("/complete-profile");
+    return null;
   }
 
   const userGigs = gigs.filter((gig) => gig.userId === user.id);
@@ -134,16 +143,16 @@ const Dashboard: React.FC = () => {
     .reduce((sum, order) => sum + order.amount, 0);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-green-800 mb-8 animate-fade-in">
+        <h1 className="text-3xl font-bold text-blue-800 mb-8 animate-fade-in">
           Dashboard
         </h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-1/4">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="card p-6">
               <div className="flex items-center mb-6">
                 <img
                   src={
@@ -161,12 +170,48 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
+              {userProfile?.bio && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                    Bio
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-3">
+                    {userProfile.bio}
+                  </p>
+                </div>
+              )}
+
+              {userProfile?.skills && userProfile.skills.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                    Skills
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {userProfile.skills
+                      .slice(0, 3)
+                      .map((skill: string, index: number) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    {userProfile.skills.length > 3 && (
+                      <span className="text-xs text-gray-500">
+                        +{userProfile.skills.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <nav className="space-y-2">
                 <button
                   onClick={() => setActiveTab("overview")}
                   className={`w-full text-left p-2 rounded-md ${
                     activeTab === "overview"
-                      ? "bg-green-600 text-white"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -176,7 +221,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => setActiveTab("gigs")}
                   className={`w-full text-left p-2 rounded-md ${
                     activeTab === "gigs"
-                      ? "bg-green-600 text-white"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -186,7 +231,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => setActiveTab("orders")}
                   className={`w-full text-left p-2 rounded-md ${
                     activeTab === "orders"
-                      ? "bg-green-600 text-white"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -196,7 +241,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => setActiveTab("messages")}
                   className={`w-full text-left p-2 rounded-md ${
                     activeTab === "messages"
-                      ? "bg-green-600 text-white"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -218,13 +263,13 @@ const Dashboard: React.FC = () => {
 
           <div className="lg:w-3/4">
             {activeTab === "overview" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="card p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Overview
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-green-600 text-white rounded-lg p-6">
+                  <div className="bg-blue-600 text-white rounded-lg p-6">
                     <h3 className="text-lg font-semibold mb-2">Total Gigs</h3>
                     <p className="text-3xl font-bold">{userGigs.length}</p>
                   </div>
@@ -273,7 +318,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-center">
                   <button
                     onClick={() => setShowQuickCreate(true)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg"
+                    className="btn-primary flex items-center space-x-2"
                   >
                     <span>+</span>
                     <span>Quick Create Service</span>
@@ -283,14 +328,14 @@ const Dashboard: React.FC = () => {
             )}
 
             {activeTab === "gigs" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="card p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
                     Recent Jobs
                   </h2>
                   <button
                     onClick={() => router.push("/offer-service")}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="btn-primary"
                   >
                     Create New Service
                   </button>
@@ -317,7 +362,7 @@ const Dashboard: React.FC = () => {
                               by {gig.userName}
                             </p>
                           </div>
-                          <span className="text-green-600 font-bold text-lg">
+                          <span className="text-blue-600 font-bold text-lg">
                             ₮{gig.price.toLocaleString()}
                           </span>
                         </div>
@@ -333,7 +378,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <button
                             onClick={() => router.push(`/gigs/${gig.id}`)}
-                            className="text-green-600 hover:text-green-700 text-sm font-medium"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                           >
                             View Details
                           </button>
@@ -348,7 +393,7 @@ const Dashboard: React.FC = () => {
                     </p>
                     <button
                       onClick={() => router.push("/offer-service")}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                      className="btn-primary"
                     >
                       Create First Service
                     </button>
@@ -358,7 +403,7 @@ const Dashboard: React.FC = () => {
             )}
 
             {activeTab === "orders" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="card p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Orders
                 </h2>
@@ -402,7 +447,7 @@ const Dashboard: React.FC = () => {
             )}
 
             {activeTab === "messages" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="card p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Messages
                 </h2>
@@ -413,7 +458,7 @@ const Dashboard: React.FC = () => {
             )}
 
             {activeTab === "settings" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="card p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Settings
                 </h2>
@@ -443,6 +488,61 @@ const Dashboard: React.FC = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         />
                       </div>
+                      {userProfile?.bio && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Bio
+                          </label>
+                          <textarea
+                            value={userProfile.bio}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={3}
+                          />
+                        </div>
+                      )}
+                      {userProfile?.education && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Education
+                          </label>
+                          <input
+                            type="text"
+                            value={userProfile.education}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      )}
+                      {userProfile?.skills && userProfile.skills.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Skills
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {userProfile.skills.map(
+                              (skill: string, index: number) => (
+                                <span
+                                  key={index}
+                                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                                >
+                                  {skill}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {userProfile?.phone && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={userProfile.phone}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -489,7 +589,7 @@ const Dashboard: React.FC = () => {
                         title: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="input-field"
                     placeholder="e.g., Web Development"
                   />
                 </div>
@@ -506,7 +606,7 @@ const Dashboard: React.FC = () => {
                         description: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="input-field"
                     rows={3}
                     placeholder="Brief description of your service"
                   />
@@ -525,7 +625,7 @@ const Dashboard: React.FC = () => {
                         price: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="input-field"
                     placeholder="50000"
                     min="0"
                     step="1000"
@@ -543,7 +643,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={handleQuickCreate}
                   disabled={creating}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creating ? "Creating..." : "Create Service"}
                 </button>
